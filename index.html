@@ -381,19 +381,22 @@
         }
         
         .calendar-button {
-            display: inline-block;
+            display: block;
             background-color: var(--success-color);
             color: var(--white);
             padding: 1rem 2.5rem;
             border-radius: 8px;
+            border: none;
             text-decoration: none;
             font-weight: 600;
             font-size: 1.1rem;
+            font-family: var(--font-family);
+            cursor: pointer;
             transition: background-color 0.2s, transform 0.2s;
             box-shadow: 0 4px 15px rgba(25, 135, 84, 0.3);
             margin-top: 1rem;
-            display: block;
             text-align: center;
+            width: 100%;
         }
         
         .calendar-button:hover {
@@ -464,6 +467,134 @@
                 position: static;
                 margin: 0 auto 1rem auto;
                 width: fit-content;
+            }
+        }
+        
+        /* --- Booking Modal --- */
+        .booking-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+        
+        .booking-modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .booking-modal-content {
+            background-color: var(--white);
+            border-radius: 16px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow: auto;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            animation: slideIn 0.3s ease;
+        }
+        
+        .booking-modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #6c757d;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        
+        .booking-modal-close:hover {
+            background-color: var(--border-color);
+            color: var(--text-color);
+        }
+        
+        .booking-iframe-container {
+            margin-top: 1rem;
+            min-height: 400px;
+            position: relative;
+        }
+        
+        .booking-iframe {
+            width: 100%;
+            height: 500px;
+            border: none;
+            border-radius: 8px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .booking-iframe.loaded {
+            opacity: 1;
+        }
+        
+        .booking-loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .booking-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border-color);
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideIn {
+            from { 
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+            .booking-modal-content {
+                width: 95%;
+                padding: 1.5rem;
+                margin: 1rem;
+            }
+            
+            .booking-iframe {
+                height: 400px;
             }
         }
 
@@ -600,7 +731,7 @@
                 <div class="calendar-cta">
                     <div class="calendar-text" data-de="Erstes kostenfreies Strategiegespräch" data-en="First free strategy consultation">Erstes kostenfreies Strategiegespräch</div>
                     <div class="calendar-subtext" data-de="Lassen Sie uns gemeinsam Ihre Makler-Tools optimieren" data-en="Let's optimize your real estate tools together">Lassen Sie uns gemeinsam Ihre Makler-Tools optimieren</div>
-                    <a href="https://valoa-studio.de" class="calendar-button" data-de="Termin buchen" data-en="Book Appointment">Termin buchen</a>
+                    <button onclick="openBookingModal()" class="calendar-button" data-de="Termin buchen" data-en="Book Appointment">Termin buchen</button>
                 </div>
             </div>
             
@@ -616,6 +747,21 @@
                 </form>
             </div>
         </footer>
+    </div>
+    
+    <!-- Booking Modal -->
+    <div id="booking-modal" class="booking-modal">
+        <div class="booking-modal-content">
+            <button class="booking-modal-close" onclick="closeBookingModal()" aria-label="Close">&times;</button>
+            <h3 data-de="Terminbuchung" data-en="Book Appointment">Terminbuchung</h3>
+            <div class="booking-iframe-container">
+                <div id="booking-loading" class="booking-loading">
+                    <div class="booking-spinner"></div>
+                    <p data-de="Kalender wird geladen..." data-en="Loading calendar...">Kalender wird geladen...</p>
+                </div>
+                <iframe id="booking-iframe" class="booking-iframe" scrolling="no"></iframe>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -916,6 +1062,143 @@
             zustandSelect.appendChild(option);
         });
     }
+    
+    // --- BOOKING MODAL FUNCTIONALITY ---
+    let bookingIframePreloaded = false;
+    let bookingObserver = null;
+    
+    // Intersection Observer für pre-loading
+    function initBookingObserver() {
+        if ('IntersectionObserver' in window) {
+            const trustSection = document.querySelector('.trust-section');
+            
+            bookingObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && entry.intersectionRatio >= 0.7) {
+                        preloadBookingIframe();
+                        bookingObserver.unobserve(trustSection);
+                    }
+                });
+            }, {
+                threshold: 0.7
+            });
+            
+            bookingObserver.observe(trustSection);
+        }
+    }
+    
+    // Pre-load iframe im Hintergrund
+    function preloadBookingIframe() {
+        if (bookingIframePreloaded) return;
+        
+        const iframe = document.getElementById('booking-iframe');
+        const bookingUrls = {
+            de: 'https://api.leadconnectorhq.com/widget/booking/kq7NmcLVgdbnxChd37gh',
+            en: 'https://api.leadconnectorhq.com/widget/booking/lqxzeVwcGdummhsI026t'
+        };
+        
+        iframe.src = bookingUrls[currentLanguage] || bookingUrls.de;
+        
+        // Script für Booking-Widget laden
+        if (!document.querySelector('script[src*="form_embed.js"]')) {
+            const script = document.createElement('script');
+            script.src = 'https://link.msgsndr.com/js/form_embed.js';
+            script.type = 'text/javascript';
+            document.head.appendChild(script);
+        }
+        
+        bookingIframePreloaded = true;
+    }
+    
+    // Modal öffnen
+    function openBookingModal() {
+        const modal = document.getElementById('booking-modal');
+        const iframe = document.getElementById('booking-iframe');
+        const loading = document.getElementById('booking-loading');
+        
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden'; // Verhindert Scrollen im Hintergrund
+        
+        // Falls noch nicht pre-loaded, jetzt laden
+        if (!bookingIframePreloaded) {
+            preloadBookingIframe();
+        }
+        
+        // Warten bis iframe geladen ist
+        iframe.onload = function() {
+            setTimeout(() => {
+                loading.style.display = 'none';
+                iframe.classList.add('loaded');
+            }, 500); // Kurze Verzögerung für smooth UX
+        };
+        
+        // Update Modal-Texte basierend auf aktueller Sprache
+        updateModalLanguage();
+    }
+    
+    // Modal schließen
+    function closeBookingModal() {
+        const modal = document.getElementById('booking-modal');
+        const iframe = document.getElementById('booking-iframe');
+        const loading = document.getElementById('booking-loading');
+        
+        modal.classList.remove('active');
+        document.body.style.overflow = ''; // Scrollen wieder aktivieren
+        
+        // Reset für nächstes Öffnen
+        loading.style.display = 'flex';
+        iframe.classList.remove('loaded');
+    }
+    
+    // Modal-Texte für aktuelle Sprache aktualisieren
+    function updateModalLanguage() {
+        const modal = document.getElementById('booking-modal');
+        const elements = modal.querySelectorAll('[data-de][data-en]');
+        
+        elements.forEach(element => {
+            const text = element.getAttribute(`data-${currentLanguage}`);
+            if (text) {
+                element.textContent = text;
+            }
+        });
+        
+        // Iframe URL auch updaten falls Sprache gewechselt wurde
+        const iframe = document.getElementById('booking-iframe');
+        const bookingUrls = {
+            de: 'https://api.leadconnectorhq.com/widget/booking/kq7NmcLVgdbnxChd37gh',
+            en: 'https://api.leadconnectorhq.com/widget/booking/lqxzeVwcGdummhsI026t'
+        };
+        
+        const newSrc = bookingUrls[currentLanguage] || bookingUrls.de;
+        if (iframe.src !== newSrc) {
+            iframe.src = newSrc;
+            iframe.classList.remove('loaded');
+            document.getElementById('booking-loading').style.display = 'flex';
+        }
+    }
+    
+    // ESC-Taste zum Schließen des Modals
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const modal = document.getElementById('booking-modal');
+            if (modal.classList.contains('active')) {
+                closeBookingModal();
+            }
+        }
+    });
+    
+    // Klick außerhalb des Modals zum Schließen
+    document.getElementById('booking-modal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeBookingModal();
+        }
+    });
+    
+    // Observer beim Laden initialisieren
+    document.addEventListener('DOMContentLoaded', function() {
+        initBookingObserver();
+    });
+    
     </script>
 
 </body>
