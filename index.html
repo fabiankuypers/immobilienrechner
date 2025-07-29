@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Immobilien Immobilien-Kosten-Rechner</title>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* --- Grundlegende Stile & Variablen --- */
+        :root {
+            --bg-color: #F8F9FA;
+            --primary-color: #005A9C; /* Seriöses Blau */
+            --primary-light: #e6f0f7;
+            --text-color: #212529;
+            --success-color: #198754; /* Dunkles Grün */
+            --warning-color: #FD7E14; /* Warmes Orange */
+            --warning-light: #ffe8d4;
+            --border-color: #DEE2E6;
+            --white: #FFFFFF;
+            --font-family: 'Inter', sans-serif;
+        }
+
+        /* --- Reset & Body --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 2rem 1rem;
+        }
+
+        /* --- Hauptcontainer & Layout --- */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        header {
+            padding: 2rem;
+            border-bottom: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        header h1 {
+            color: var(--primary-color);
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            font-size: 1.1rem;
+            color: #6c757d;
+        }
+        
+        .rechner-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .input-section, .output-section {
+            padding: 2rem;
+            width: 100%;
+        }
+
+        .input-section {
+            background-color: #fdfdff;
+        }
+        
+        /* --- Formular-Elemente --- */
+        .form-group {
+            margin-bottom: 2rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-group .label-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .form-group .live-value {
+            font-weight: 700;
+            color: var(--primary-color);
+            font-size: 1.1rem;
+            background-color: var(--primary-light);
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+        }
+
+        .form-group .info-text {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-top: 0.25rem;
+        }
+
+        input[type="number"], select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: var(--font-family);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input[type="number"]:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 90, 156, 0.2);
+        }
+
+        /* Slider Stile */
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 5px;
+            outline: none;
+            margin-top: 0.5rem;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--primary-color);
+            cursor: pointer;
+            border-radius: 50%;
+            border: 2px solid var(--white);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: var(--primary-color);
+            cursor: pointer;
+            border-radius: 50%;
+            border: 2px solid var(--white);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        /* Checkbox Stile */
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .checkbox-group input[type="checkbox"] {
+            width: 1.25em;
+            height: 1.25em;
+            accent-color: var(--primary-color);
+        }
+        
+        .makler-provision-rate {
+            transition: opacity 0.3s, transform 0.3s;
+            transform: translateY(-10px);
+            opacity: 0;
+            height: 0;
+            overflow: hidden;
+        }
+        
+        .makler-provision-rate.visible {
+            transform: translateY(0);
+            opacity: 1;
+            height: auto;
+            margin-top: 1rem;
+        }
+
+        /* --- Output / Ergebnis-Sektion --- */
+        .output-section {
+            background-color: var(--white);
+            border-left: 1px solid var(--border-color);
+        }
+        
+        .results-summary {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+        
+        .results-summary h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .results-summary .total-investment {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--success-color);
+            margin: 0.5rem 0;
+        }
+        
+        .results-summary .financing-needed {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 280px;
+            width: 280px;
+            margin: 0 auto 2.5rem auto;
+        }
+        
+        .cost-breakdown ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .cost-breakdown li {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #f1f3f5;
+        }
+        
+        .cost-breakdown li:last-child {
+            border-bottom: none;
+        }
+        
+        .cost-breakdown .cost-label {
+            color: #495057;
+        }
+        
+        .cost-breakdown .cost-value {
+            font-weight: 600;
+        }
+        
+        .cost-breakdown .highlight {
+            color: var(--warning-color);
+        }
+        
+        .cost-breakdown .total {
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding-top: 1rem;
+        }
+        
+        .cost-breakdown .final-total .cost-value {
+            color: var(--success-color);
+        }
+        
+        hr.divider {
+            border: 0;
+            height: 1px;
+            background-color: var(--border-color);
+            margin: 1rem 0;
+        }
+
+        /* --- CTA Sektion --- */
+        .cta-section {
+            background-color: var(--primary-light);
+            padding: 2.5rem;
+            text-align: center;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .cta-section h2 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .cta-section p {
+            max-width: 600px;
+            margin: 0 auto 1.5rem auto;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: var(--white);
+            padding: 0.8rem 2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background-color 0.2s, transform 0.2s;
+            box-shadow: 0 4px 15px rgba(0, 90, 156, 0.2);
+        }
+        
+        .cta-button:hover {
+            background-color: #004a80;
+            transform: translateY(-2px);
+        }
+        
+        .cta-buyer-form {
+            margin-top: 2rem;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .cta-buyer-form p {
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .cta-buyer-form .form-inline {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .cta-buyer-form input[type="email"] {
+            flex-grow: 1;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
+        
+        .cta-buyer-form button {
+            background-color: var(--success-color);
+            color: var(--white);
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+        
+        .cta-buyer-form button:hover {
+            background-color: #146c43;
+        }
+        
+        /* --- Vertrauensfoto & Kalendertermin --- */
+        .trust-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            margin: 2rem 0 3rem 0;
+            flex-wrap: wrap;
+            background-color: var(--white);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+        
+        .trust-photo {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--primary-color);
+            box-shadow: 0 4px 15px rgba(0, 90, 156, 0.2);
+        }
+        
+        .calendar-cta {
+            text-align: left;
+        }
+        
+        .calendar-button {
+            display: inline-block;
+            background-color: var(--success-color);
+            color: var(--white);
+            padding: 1rem 2.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: background-color 0.2s, transform 0.2s;
+            box-shadow: 0 4px 15px rgba(25, 135, 84, 0.3);
+            margin-top: 1rem;
+            display: block;
+            text-align: center;
+        }
+        
+        .calendar-button:hover {
+            background-color: #146c43;
+            transform: translateY(-2px);
+        }
+        
+        .calendar-text {
+            font-size: 1.1rem;
+            color: var(--text-color);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .calendar-subtext {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-bottom: 0.5rem;
+        }
+        
+        /* CTA Buttons Layout */
+        .cta-buttons-section {
+            margin: 2rem 0;
+        }
+
+        /* --- Responsive Design --- */
+        @media (min-width: 992px) {
+            .rechner-wrapper {
+                flex-wrap: nowrap;
+            }
+            .input-section {
+                width: 45%;
+                border-right: 1px solid var(--border-color);
+            }
+            .output-section {
+                width: 55%;
+                border-left: none;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Immobilien Immobilien-Kosten-Rechner</h1>
+            <p>Die brutale Wahrheit über die echten Kosten deines Immobilienkaufs.</p>
+        </header>
+
+        <main class="rechner-wrapper">
+            <!-- Eingabe-Sektion -->
+            <section class="input-section">
+                <form id="cost-calculator-form">
+                    
+                    <div class="form-group">
+                        <div class="label-wrapper">
+                            <label for="kaufpreis">Kaufpreis der Immobilie (€)</label>
+                            <span id="kaufpreis-value" class="live-value">450.000 €</span>
+                        </div>
+                        <input type="range" id="kaufpreis" min="100000" max="2000000" step="5000" value="450000">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="wohnflaeche">Wohnfläche (m²)</label>
+                        <input type="number" id="wohnflaeche" value="120" placeholder="z.B. 120">
+                        <p class="info-text">Wichtig für die Schätzung der Sanierungskosten.</p>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="label-wrapper">
+                            <label for="eigenkapital">Dein Eigenkapital (€)</label>
+                            <span id="eigenkapital-value" class="live-value">80.000 €</span>
+                        </div>
+                        <input type="range" id="eigenkapital" min="0" max="500000" step="1000" value="80000">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bundesland">Bundesland</label>
+                        <select id="bundesland">
+                            <!-- Options will be populated by JS -->
+                        </select>
+                        <p class="info-text">Die Grunderwerbsteuer ist je nach Bundesland unterschiedlich hoch.</p>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="mitMakler" checked>
+                            <label for="mitMakler">Ja, mit Makler</label>
+                        </div>
+                        <div id="makler-provision-rate-wrapper" class="makler-provision-rate visible">
+                            <label for="maklerprovision">Provisionssatz inkl. MwSt. (%)</label>
+                            <input type="number" id="maklerprovision" value="3.57" step="0.01">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="zustand">Zustand der Immobilie</label>
+                        <select id="zustand">
+                            <!-- Options will be populated by JS -->
+                        </select>
+                        <p class="info-text">Sei ehrlich zu dir selbst. Das erspart dir böse Überraschungen.</p>
+                    </div>
+
+                </form>
+            </section>
+
+            <!-- Ergebnis-Sektion -->
+            <section class="output-section">
+                <div class="results-summary">
+                    <h3>Deine wahre Gesamt-Investition</h3>
+                    <div id="total-investment-display" class="total-investment">0 €</div>
+                    <h3 style="margin-top: 1rem;">Voraussichtlicher Finanzierungsbedarf</h3>
+                    <div id="financing-needed-display" class="financing-needed">0 €</div>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="cost-chart"></canvas>
+                </div>
+
+                <div class="cost-breakdown">
+                    <ul>
+                        <li><span class="cost-label">Kaufpreis</span> <span id="summary-kaufpreis" class="cost-value">0 €</span></li>
+                        <hr class="divider">
+                        <li><span class="cost-label">Notar & Grundbuch (~2%)</span> <span id="summary-notar" class="cost-value">0 €</span></li>
+                        <li><span class="cost-label">Grunderwerbsteuer (<span id="summary-bundesland-name">NRW</span> - <span id="summary-steuer-satz">6.5</span>%)</span> <span id="summary-steuer" class="cost-value">0 €</span></li>
+                        <li><span class="cost-label">Maklerprovision (<span id="summary-makler-satz">3.57</span>%)</span> <span id="summary-makler" class="cost-value">0 €</span></li>
+                        <li class="total"><span class="cost-label">Summe Kaufnebenkosten</span> <span id="summary-nebenkosten-total" class="cost-value">0 €</span></li>
+                        <hr class="divider">
+                        <li class="highlight"><span class="cost-label">Geschätzte Sanierungskosten</span> <span id="summary-sanierung" class="cost-value">0 €</span></li>
+                        <li class="highlight"><span class="cost-label">Dein Sicherheits-Puffer (5%)</span> <span id="summary-puffer" class="cost-value">0 €</span></li>
+                        <hr class="divider">
+                        <li class="total final-total"><span class="cost-label">DEINE WAHREN GESAMTKOSTEN</span> <span id="summary-gesamtkosten" class="cost-value">0 €</span></li>
+                        <li><span class="cost-label">./. Dein Eigenkapital</span> <span id="summary-eigenkapital" class="cost-value">- 0 €</span></li>
+                        <hr class="divider" style="border-style: dashed;">
+                        <li class="total"><span class="cost-label">FINANZIERUNGSBEDARF</span> <span id="summary-finanzierungsbedarf" class="cost-value">0 €</span></li>
+                    </ul>
+                </div>
+            </section>
+        </main>
+        
+        <footer class="cta-section">
+            <h2>Puh, das ist mehr als gedacht?</h2>
+            <p>Genau das ist der Punkt. Die meisten Makler zeigen dir nur den Kaufpreis. Ein ehrlicher Partner zeigt dir die Wahrheit. Ich helfe Maklern dabei, genau solche digitalen Werkzeuge zu erstellen, die Vertrauen schaffen und die richtigen Käufer anziehen.</p>
+            
+            <div class="trust-section">
+                <img src="fabian-kuypers.webp" alt="Fabian Valoa - Vertrauensfoto" class="trust-photo">
+                <div class="calendar-cta">
+                    <div class="calendar-text">Erstes kostenfreies Strategiegespräch</div>
+                    <div class="calendar-subtext">Lassen Sie uns gemeinsam Ihre Makler-Tools optimieren</div>
+                    <a href="https://valoa-studio.de" class="calendar-button">Termin buchen</a>
+                </div>
+            </div>
+            
+            <div class="cta-buttons-section">
+                <a href="https://valoa.studio" class="cta-button">Für Makler: So geht's</a>
+            </div>
+            
+            <div class="cta-buyer-form">
+                <p>Du bist Käufer und suchst einen Makler, der Klartext spricht? Fordere hier eine Liste geprüfter Partner an:</p>
+                <form action="#" class="form-inline">
+                    <input type="email" placeholder="Deine E-Mail-Adresse" required>
+                    <button type="submit">Liste anfordern</button>
+                </form>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        // --- DATENOBJEKTE ---
+        const grunderwerbsteuerSaetze = {
+            "Baden-Württemberg": 5.0, "Bayern": 3.5, "Berlin": 6.0, "Brandenburg": 6.5,
+            "Bremen": 5.0, "Hamburg": 5.5, "Hessen": 6.0, "Mecklenburg-Vorpommern": 6.0,
+            "Niedersachsen": 5.0, "Nordrhein-Westfalen": 6.5, "Rheinland-Pfalz": 5.0,
+            "Saarland": 6.5, "Sachsen": 5.5, "Sachsen-Anhalt": 5.0, "Schleswig-Holstein": 6.5,
+            "Thüringen": 5.0
+        };
+
+        const sanierungsZustaende = {
+            "Neubau / Top-Zustand": 0,
+            "Leichte Kosmetik (Maler, Böden)": 250,
+            "Standard-Sanierung (Bad/Küche fällig)": 700,
+            "Komplettsanierung (inkl. Fenster/Elektrik)": 1200,
+            "Energetisches Sorgenkind (Heizung, Dach)": 1800
+        };
+
+        // --- DOM-ELEMENTE ---
+        const form = document.getElementById('cost-calculator-form');
+        const kaufpreisSlider = document.getElementById('kaufpreis');
+        const kaufpreisValue = document.getElementById('kaufpreis-value');
+        const wohnflaecheInput = document.getElementById('wohnflaeche');
+        const eigenkapitalSlider = document.getElementById('eigenkapital');
+        const eigenkapitalValue = document.getElementById('eigenkapital-value');
+        const bundeslandSelect = document.getElementById('bundesland');
+        const mitMaklerCheckbox = document.getElementById('mitMakler');
+        const maklerProvisionRateWrapper = document.getElementById('makler-provision-rate-wrapper');
+        const maklerProvisionInput = document.getElementById('maklerprovision');
+        const zustandSelect = document.getElementById('zustand');
+        
+        // Output-Elemente
+        const totalInvestmentDisplay = document.getElementById('total-investment-display');
+        const financingNeededDisplay = document.getElementById('financing-needed-display');
+        const summaryKaufpreis = document.getElementById('summary-kaufpreis');
+        const summaryNotar = document.getElementById('summary-notar');
+        const summaryBundeslandName = document.getElementById('summary-bundesland-name');
+        const summarySteuerSatz = document.getElementById('summary-steuer-satz');
+        const summarySteuer = document.getElementById('summary-steuer');
+        const summaryMaklerSatz = document.getElementById('summary-makler-satz');
+        const summaryMakler = document.getElementById('summary-makler');
+        const summaryNebenkostenTotal = document.getElementById('summary-nebenkosten-total');
+        const summarySanierung = document.getElementById('summary-sanierung');
+        const summaryPuffer = document.getElementById('summary-puffer');
+        const summaryGesamtkosten = document.getElementById('summary-gesamtkosten');
+        const summaryEigenkapital = document.getElementById('summary-eigenkapital');
+        const summaryFinanzierungsbedarf = document.getElementById('summary-finanzierungsbedarf');
+        
+        // Chart
+        const ctx = document.getElementById('cost-chart').getContext('2d');
+        let costChart;
+
+        // --- INITIALISIERUNG ---
+        function init() {
+            // Dropdowns befüllen
+            populateDropdown(bundeslandSelect, Object.keys(grunderwerbsteuerSaetze), 'Nordrhein-Westfalen');
+            populateDropdown(zustandSelect, Object.keys(sanierungsZustaende), 'Leichte Kosmetik (Maler, Böden)');
+
+            // Event Listeners hinzufügen
+            form.addEventListener('input', calculateAndDisplay);
+            mitMaklerCheckbox.addEventListener('change', toggleMaklerProvision);
+
+            // Chart initialisieren
+            initializeChart();
+            
+            // Erste Berechnung durchführen
+            calculateAndDisplay();
+        }
+
+        function populateDropdown(selectElement, options, defaultValue) {
+            options.forEach(option => {
+                const optionElement = document.createElement('option');
+                optionElement.value = option;
+                optionElement.textContent = option;
+                if (option === defaultValue) {
+                    optionElement.selected = true;
+                }
+                selectElement.appendChild(optionElement);
+            });
+        }
+        
+        function toggleMaklerProvision() {
+            maklerProvisionRateWrapper.classList.toggle('visible', mitMaklerCheckbox.checked);
+            calculateAndDisplay();
+        }
+
+        // --- BERECHNUNGSLOGIK ---
+        function calculateAndDisplay() {
+            // 1. Werte aus dem Formular lesen
+            const kaufpreis = parseFloat(kaufpreisSlider.value);
+            const wohnflaeche = parseFloat(wohnflaecheInput.value) || 0;
+            const eigenkapital = parseFloat(eigenkapitalSlider.value);
+            const bundesland = bundeslandSelect.value;
+            const istMitMakler = mitMaklerCheckbox.checked;
+            const maklerSatz = parseFloat(maklerProvisionInput.value) / 100 || 0;
+            const zustand = zustandSelect.value;
+
+            // 2. Berechnungen durchführen
+            const notarKosten = kaufpreis * 0.02;
+            const steuerSatz = grunderwerbsteuerSaetze[bundesland] / 100;
+            const grunderwerbsteuer = kaufpreis * steuerSatz;
+            const maklerKosten = istMitMakler ? kaufpreis * maklerSatz : 0;
+            const nebenkosten = notarKosten + grunderwerbsteuer + maklerKosten;
+
+            const sanierungsKostenSatz = sanierungsZustaende[zustand];
+            const sanierungskosten = wohnflaeche * sanierungsKostenSatz;
+
+            const zwischensumme = kaufpreis + nebenkosten + sanierungskosten;
+            const sicherheitspuffer = zwischensumme * 0.05;
+            
+            const gesamtInvestition = zwischensumme + sicherheitspuffer;
+            const finanzierungsbedarf = gesamtInvestition - eigenkapital;
+
+            // 3. Ergebnisse anzeigen
+            // Live-Werte der Slider aktualisieren
+            kaufpreisValue.textContent = formatCurrency(kaufpreis);
+            eigenkapitalValue.textContent = formatCurrency(eigenkapital);
+
+            // Haupt-Ergebnisse
+            totalInvestmentDisplay.textContent = formatCurrency(gesamtInvestition);
+            financingNeededDisplay.textContent = formatCurrency(finanzierungsbedarf);
+
+            // Detail-Aufschlüsselung
+            summaryKaufpreis.textContent = formatCurrency(kaufpreis);
+            summaryNotar.textContent = formatCurrency(notarKosten);
+            summaryBundeslandName.textContent = bundesland;
+            summarySteuerSatz.textContent = (steuerSatz * 100).toFixed(1);
+            summarySteuer.textContent = formatCurrency(grunderwerbsteuer);
+            summaryMaklerSatz.textContent = (maklerSatz * 100).toFixed(2);
+            summaryMakler.textContent = formatCurrency(maklerKosten);
+            summaryNebenkostenTotal.textContent = formatCurrency(nebenkosten);
+            summarySanierung.textContent = formatCurrency(sanierungskosten);
+            summaryPuffer.textContent = formatCurrency(sicherheitspuffer);
+            summaryGesamtkosten.textContent = formatCurrency(gesamtInvestition);
+            summaryEigenkapital.textContent = `- ${formatCurrency(eigenkapital)}`;
+            summaryFinanzierungsbedarf.textContent = formatCurrency(finanzierungsbedarf);
+            
+            // 4. Chart aktualisieren
+            updateChart([kaufpreis, nebenkosten, sanierungskosten, sicherheitspuffer]);
+        }
+        
+        // --- CHART FUNKTIONEN ---
+        function initializeChart() {
+            costChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Kaufpreis', 'Kaufnebenkosten', 'Sanierungskosten', 'Sicherheits-Puffer'],
+                    datasets: [{
+                        data: [0, 0, 0, 0],
+                        backgroundColor: [
+                            '#005A9C', // Primärfarbe
+                            '#5ba0d8', // Helleres Blau
+                            '#FD7E14', // Warnfarbe
+                            '#fecba1'  // Helleres Orange
+                        ],
+                        borderColor: '#FFFFFF',
+                        borderWidth: 4,
+                        hoverOffset: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '65%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                font: {
+                                    family: "'Inter', sans-serif"
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed !== null) {
+                                        label += formatCurrency(context.parsed);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateChart(data) {
+            costChart.data.datasets[0].data = data;
+            costChart.update();
+        }
+
+        // --- HELPER FUNKTIONEN ---
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 }).format(value);
+        }
+
+        // --- Start ---
+        init();
+    });
+    </script>
+
+</body>
+</html>
