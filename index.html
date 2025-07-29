@@ -57,6 +57,7 @@
             padding: 2rem;
             border-bottom: 1px solid var(--border-color);
             text-align: center;
+            position: relative;
         }
 
         header h1 {
@@ -417,6 +418,54 @@
         .cta-buttons-section {
             margin: 2rem 0;
         }
+        
+        /* --- Language Toggle --- */
+        .language-toggle {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            display: flex;
+            background-color: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .language-toggle button {
+            background: none;
+            border: none;
+            padding: 0.5rem 0.75rem;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .language-toggle button:hover {
+            background-color: var(--primary-light);
+        }
+        
+        .language-toggle button.active {
+            background-color: var(--primary-color);
+            color: var(--white);
+        }
+        
+        .language-toggle button.active:hover {
+            background-color: #004a80;
+        }
+        
+        /* Mobile Language Toggle */
+        @media (max-width: 768px) {
+            .language-toggle {
+                position: static;
+                margin: 0 auto 1rem auto;
+                width: fit-content;
+            }
+        }
 
         /* --- Responsive Design --- */
         @media (min-width: 992px) {
@@ -439,8 +488,16 @@
 
     <div class="container">
         <header>
-            <h1>Immobilien Immobilien-Kosten-Rechner</h1>
-            <p>Die brutale Wahrheit über die echten Kosten deines Immobilienkaufs.</p>
+            <div class="language-toggle">
+                <button id="lang-de" class="active" onclick="switchLanguage('de')">
+                    🇩🇪 DE
+                </button>
+                <button id="lang-en" onclick="switchLanguage('en')">
+                    🇬🇧 EN
+                </button>
+            </div>
+            <h1 data-de="Immobilien Immobilien-Kosten-Rechner" data-en="Real Estate Cost Calculator">Immobilien Immobilien-Kosten-Rechner</h1>
+            <p data-de="Die brutale Wahrheit über die echten Kosten deines Immobilienkaufs." data-en="The brutal truth about the real costs of your property purchase.">Die brutale Wahrheit über die echten Kosten deines Immobilienkaufs.</p>
         </header>
 
         <main class="rechner-wrapper">
@@ -450,51 +507,51 @@
                     
                     <div class="form-group">
                         <div class="label-wrapper">
-                            <label for="kaufpreis">Kaufpreis der Immobilie (€)</label>
+                            <label for="kaufpreis" data-de="Kaufpreis der Immobilie (€)" data-en="Property Purchase Price (€)">Kaufpreis der Immobilie (€)</label>
                             <span id="kaufpreis-value" class="live-value">450.000 €</span>
                         </div>
                         <input type="range" id="kaufpreis" min="100000" max="2000000" step="5000" value="450000">
                     </div>
 
                     <div class="form-group">
-                        <label for="wohnflaeche">Wohnfläche (m²)</label>
-                        <input type="number" id="wohnflaeche" value="120" placeholder="z.B. 120">
-                        <p class="info-text">Wichtig für die Schätzung der Sanierungskosten.</p>
+                        <label for="wohnflaeche" data-de="Wohnfläche (m²)" data-en="Living Space (m²)">Wohnfläche (m²)</label>
+                        <input type="number" id="wohnflaeche" value="120" placeholder="z.B. 120" data-placeholder-de="z.B. 120" data-placeholder-en="e.g. 120">
+                        <p class="info-text" data-de="Wichtig für die Schätzung der Sanierungskosten." data-en="Important for estimating renovation costs.">Wichtig für die Schätzung der Sanierungskosten.</p>
                     </div>
 
                     <div class="form-group">
                         <div class="label-wrapper">
-                            <label for="eigenkapital">Dein Eigenkapital (€)</label>
+                            <label for="eigenkapital" data-de="Dein Eigenkapital (€)" data-en="Your Equity (€)">Dein Eigenkapital (€)</label>
                             <span id="eigenkapital-value" class="live-value">80.000 €</span>
                         </div>
                         <input type="range" id="eigenkapital" min="0" max="500000" step="1000" value="80000">
                     </div>
 
                     <div class="form-group">
-                        <label for="bundesland">Bundesland</label>
+                        <label for="bundesland" data-de="Bundesland" data-en="German State">Bundesland</label>
                         <select id="bundesland">
                             <!-- Options will be populated by JS -->
                         </select>
-                        <p class="info-text">Die Grunderwerbsteuer ist je nach Bundesland unterschiedlich hoch.</p>
+                        <p class="info-text" data-de="Die Grunderwerbsteuer ist je nach Bundesland unterschiedlich hoch." data-en="Property transfer tax varies by German state.">Die Grunderwerbsteuer ist je nach Bundesland unterschiedlich hoch.</p>
                     </div>
 
                     <div class="form-group">
                         <div class="checkbox-group">
                             <input type="checkbox" id="mitMakler" checked>
-                            <label for="mitMakler">Ja, mit Makler</label>
+                            <label for="mitMakler" data-de="Ja, mit Makler" data-en="Yes, with real estate agent">Ja, mit Makler</label>
                         </div>
                         <div id="makler-provision-rate-wrapper" class="makler-provision-rate visible">
-                            <label for="maklerprovision">Provisionssatz inkl. MwSt. (%)</label>
+                            <label for="maklerprovision" data-de="Provisionssatz inkl. MwSt. (%)" data-en="Commission rate incl. VAT (%)">Provisionssatz inkl. MwSt. (%)</label>
                             <input type="number" id="maklerprovision" value="3.57" step="0.01">
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label for="zustand">Zustand der Immobilie</label>
+                        <label for="zustand" data-de="Zustand der Immobilie" data-en="Property Condition">Zustand der Immobilie</label>
                         <select id="zustand">
                             <!-- Options will be populated by JS -->
                         </select>
-                        <p class="info-text">Sei ehrlich zu dir selbst. Das erspart dir böse Überraschungen.</p>
+                        <p class="info-text" data-de="Sei ehrlich zu dir selbst. Das erspart dir böse Überraschungen." data-en="Be honest with yourself. This will save you from nasty surprises.">Sei ehrlich zu dir selbst. Das erspart dir böse Überraschungen.</p>
                     </div>
 
                 </form>
@@ -503,9 +560,9 @@
             <!-- Ergebnis-Sektion -->
             <section class="output-section">
                 <div class="results-summary">
-                    <h3>Deine wahre Gesamt-Investition</h3>
+                    <h3 data-de="Deine wahre Gesamt-Investition" data-en="Your True Total Investment">Deine wahre Gesamt-Investition</h3>
                     <div id="total-investment-display" class="total-investment">0 €</div>
-                    <h3 style="margin-top: 1rem;">Voraussichtlicher Finanzierungsbedarf</h3>
+                    <h3 style="margin-top: 1rem;" data-de="Voraussichtlicher Finanzierungsbedarf" data-en="Expected Financing Requirement">Voraussichtlicher Finanzierungsbedarf</h3>
                     <div id="financing-needed-display" class="financing-needed">0 €</div>
                 </div>
 
@@ -515,47 +572,47 @@
 
                 <div class="cost-breakdown">
                     <ul>
-                        <li><span class="cost-label">Kaufpreis</span> <span id="summary-kaufpreis" class="cost-value">0 €</span></li>
+                        <li><span class="cost-label" data-de="Kaufpreis" data-en="Purchase Price">Kaufpreis</span> <span id="summary-kaufpreis" class="cost-value">0 €</span></li>
                         <hr class="divider">
-                        <li><span class="cost-label">Notar & Grundbuch (~2%)</span> <span id="summary-notar" class="cost-value">0 €</span></li>
+                        <li><span class="cost-label" data-de="Notar & Grundbuch (~2%)" data-en="Notary & Land Registry (~2%)">Notar & Grundbuch (~2%)</span> <span id="summary-notar" class="cost-value">0 €</span></li>
                         <li><span class="cost-label">Grunderwerbsteuer (<span id="summary-bundesland-name">NRW</span> - <span id="summary-steuer-satz">6.5</span>%)</span> <span id="summary-steuer" class="cost-value">0 €</span></li>
-                        <li><span class="cost-label">Maklerprovision (<span id="summary-makler-satz">3.57</span>%)</span> <span id="summary-makler" class="cost-value">0 €</span></li>
-                        <li class="total"><span class="cost-label">Summe Kaufnebenkosten</span> <span id="summary-nebenkosten-total" class="cost-value">0 €</span></li>
+                        <li><span class="cost-label" data-de="Maklerprovision" data-en="Real Estate Commission">Maklerprovision</span> (<span id="summary-makler-satz">3.57</span>%) <span id="summary-makler" class="cost-value">0 €</span></li>
+                        <li class="total"><span class="cost-label" data-de="Summe Kaufnebenkosten" data-en="Total Purchase Costs">Summe Kaufnebenkosten</span> <span id="summary-nebenkosten-total" class="cost-value">0 €</span></li>
                         <hr class="divider">
-                        <li class="highlight"><span class="cost-label">Geschätzte Sanierungskosten</span> <span id="summary-sanierung" class="cost-value">0 €</span></li>
-                        <li class="highlight"><span class="cost-label">Dein Sicherheits-Puffer (5%)</span> <span id="summary-puffer" class="cost-value">0 €</span></li>
+                        <li class="highlight"><span class="cost-label" data-de="Geschätzte Sanierungskosten" data-en="Estimated Renovation Costs">Geschätzte Sanierungskosten</span> <span id="summary-sanierung" class="cost-value">0 €</span></li>
+                        <li class="highlight"><span class="cost-label" data-de="Dein Sicherheits-Puffer (5%)" data-en="Your Safety Buffer (5%)">Dein Sicherheits-Puffer (5%)</span> <span id="summary-puffer" class="cost-value">0 €</span></li>
                         <hr class="divider">
-                        <li class="total final-total"><span class="cost-label">DEINE WAHREN GESAMTKOSTEN</span> <span id="summary-gesamtkosten" class="cost-value">0 €</span></li>
-                        <li><span class="cost-label">./. Dein Eigenkapital</span> <span id="summary-eigenkapital" class="cost-value">- 0 €</span></li>
+                        <li class="total final-total"><span class="cost-label" data-de="DEINE WAHREN GESAMTKOSTEN" data-en="YOUR TRUE TOTAL COSTS">DEINE WAHREN GESAMTKOSTEN</span> <span id="summary-gesamtkosten" class="cost-value">0 €</span></li>
+                        <li><span class="cost-label" data-de="./. Dein Eigenkapital" data-en="./. Your Equity">./. Dein Eigenkapital</span> <span id="summary-eigenkapital" class="cost-value">- 0 €</span></li>
                         <hr class="divider" style="border-style: dashed;">
-                        <li class="total"><span class="cost-label">FINANZIERUNGSBEDARF</span> <span id="summary-finanzierungsbedarf" class="cost-value">0 €</span></li>
+                        <li class="total"><span class="cost-label" data-de="FINANZIERUNGSBEDARF" data-en="FINANCING REQUIREMENT">FINANZIERUNGSBEDARF</span> <span id="summary-finanzierungsbedarf" class="cost-value">0 €</span></li>
                     </ul>
                 </div>
             </section>
         </main>
         
         <footer class="cta-section">
-            <h2>Puh, das ist mehr als gedacht?</h2>
-            <p>Genau das ist der Punkt. Die meisten Makler zeigen dir nur den Kaufpreis. Ein ehrlicher Partner zeigt dir die Wahrheit. Ich helfe Maklern dabei, genau solche digitalen Werkzeuge zu erstellen, die Vertrauen schaffen und die richtigen Käufer anziehen.</p>
+            <h2 data-de="Puh, das ist mehr als gedacht?" data-en="Whoa, that's more than expected?">Puh, das ist mehr als gedacht?</h2>
+            <p data-de="Genau das ist der Punkt. Die meisten Makler zeigen dir nur den Kaufpreis. Ein ehrlicher Partner zeigt dir die Wahrheit. Ich helfe Maklern dabei, genau solche digitalen Werkzeuge zu erstellen, die Vertrauen schaffen und die richtigen Käufer anziehen." data-en="That's exactly the point. Most real estate agents only show you the purchase price. An honest partner shows you the truth. I help real estate agents create digital tools like this that build trust and attract the right buyers.">Genau das ist der Punkt. Die meisten Makler zeigen dir nur den Kaufpreis. Ein ehrlicher Partner zeigt dir die Wahrheit. Ich helfe Maklern dabei, genau solche digitalen Werkzeuge zu erstellen, die Vertrauen schaffen und die richtigen Käufer anziehen.</p>
             
             <div class="trust-section">
                 <img src="fabian-kuypers.webp" alt="Fabian Valoa - Vertrauensfoto" class="trust-photo">
                 <div class="calendar-cta">
-                    <div class="calendar-text">Erstes kostenfreies Strategiegespräch</div>
-                    <div class="calendar-subtext">Lassen Sie uns gemeinsam Ihre Makler-Tools optimieren</div>
-                    <a href="https://valoa-studio.de" class="calendar-button">Termin buchen</a>
+                    <div class="calendar-text" data-de="Erstes kostenfreies Strategiegespräch" data-en="First free strategy consultation">Erstes kostenfreies Strategiegespräch</div>
+                    <div class="calendar-subtext" data-de="Lassen Sie uns gemeinsam Ihre Makler-Tools optimieren" data-en="Let's optimize your real estate tools together">Lassen Sie uns gemeinsam Ihre Makler-Tools optimieren</div>
+                    <a href="https://valoa-studio.de" class="calendar-button" data-de="Termin buchen" data-en="Book Appointment">Termin buchen</a>
                 </div>
             </div>
             
             <div class="cta-buttons-section">
-                <a href="https://valoa.studio" class="cta-button">Für Makler: So geht's</a>
+                <a href="https://valoa.studio" class="cta-button" data-de="Für Makler: So geht's" data-en="For Real Estate Agents: How it works">Für Makler: So geht's</a>
             </div>
             
             <div class="cta-buyer-form">
-                <p>Du bist Käufer und suchst einen Makler, der Klartext spricht? Fordere hier eine Liste geprüfter Partner an:</p>
+                <p data-de="Du bist Käufer und suchst einen Makler, der Klartext spricht? Fordere hier eine Liste geprüfter Partner an:" data-en="Are you a buyer looking for a real estate agent who speaks plainly? Request a list of verified partners here:">Du bist Käufer und suchst einen Makler, der Klartext spricht? Fordere hier eine Liste geprüfter Partner an:</p>
                 <form action="#" class="form-inline">
-                    <input type="email" placeholder="Deine E-Mail-Adresse" required>
-                    <button type="submit">Liste anfordern</button>
+                    <input type="email" placeholder="Deine E-Mail-Adresse" data-placeholder-de="Deine E-Mail-Adresse" data-placeholder-en="Your email address" required>
+                    <button type="submit" data-de="Liste anfordern" data-en="Request List">Liste anfordern</button>
                 </form>
             </div>
         </footer>
@@ -769,6 +826,96 @@
         // --- Start ---
         init();
     });
+    
+    // --- LANGUAGE TOGGLE FUNCTIONALITY ---
+    let currentLanguage = 'de';
+    
+    function switchLanguage(lang) {
+        currentLanguage = lang;
+        
+        // Update button states
+        document.getElementById('lang-de').classList.toggle('active', lang === 'de');
+        document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+        
+        // Update all elements with data-de and data-en attributes
+        const elements = document.querySelectorAll('[data-de][data-en]');
+        elements.forEach(element => {
+            const text = element.getAttribute(`data-${lang}`);
+            if (text) {
+                element.textContent = text;
+            }
+        });
+        
+        // Update placeholders
+        const placeholderElements = document.querySelectorAll(`[data-placeholder-${lang}]`);
+        placeholderElements.forEach(element => {
+            const placeholder = element.getAttribute(`data-placeholder-${lang}`);
+            if (placeholder) {
+                element.placeholder = placeholder;
+            }
+        });
+        
+        // Update chart labels based on language
+        updateChartLanguage(lang);
+        
+        // Update dropdown options
+        updateDropdownOptions(lang);
+    }
+    
+    function updateChartLanguage(lang) {
+        if (typeof costChart !== 'undefined' && costChart) {
+            const labels = lang === 'de' 
+                ? ['Kaufpreis', 'Kaufnebenkosten', 'Sanierungskosten', 'Sicherheits-Puffer']
+                : ['Purchase Price', 'Purchase Costs', 'Renovation Costs', 'Safety Buffer'];
+            
+            costChart.data.labels = labels;
+            costChart.update();
+        }
+    }
+    
+    function updateDropdownOptions(lang) {
+        // Update Bundesland dropdown
+        const bundeslandSelect = document.getElementById('bundesland');
+        const selectedValue = bundeslandSelect.value;
+        
+        if (lang === 'en') {
+            // Keep German state names but add English explanation in info text
+            const infoText = bundeslandSelect.parentNode.querySelector('.info-text');
+            if (infoText) {
+                infoText.textContent = infoText.getAttribute('data-en');
+            }
+        }
+        
+        // Update Zustand dropdown options
+        const zustandSelect = document.getElementById('zustand');
+        const selectedZustand = zustandSelect.value;
+        
+        const zustandOptions = lang === 'de' ? {
+            "Neubau / Top-Zustand": "New Construction / Top Condition",
+            "Leichte Kosmetik (Maler, Böden)": "Light Cosmetics (Paint, Floors)",
+            "Standard-Sanierung (Bad/Küche fällig)": "Standard Renovation (Bath/Kitchen due)",
+            "Komplettsanierung (inkl. Fenster/Elektrik)": "Complete Renovation (incl. Windows/Electrical)",
+            "Energetisches Sorgenkind (Heizung, Dach)": "Energy Problem Child (Heating, Roof)"
+        } : {
+            "New Construction / Top Condition": "Neubau / Top-Zustand",
+            "Light Cosmetics (Paint, Floors)": "Leichte Kosmetik (Maler, Böden)",
+            "Standard Renovation (Bath/Kitchen due)": "Standard-Sanierung (Bad/Küche fällig)",
+            "Complete Renovation (incl. Windows/Electrical)": "Komplettsanierung (inkl. Fenster/Elektrik)",
+            "Energy Problem Child (Heating, Roof)": "Energetisches Sorgenkind (Heizung, Dach)"
+        };
+        
+        // Clear and repopulate zustand dropdown
+        zustandSelect.innerHTML = '';
+        Object.keys(zustandOptions).forEach(key => {
+            const option = document.createElement('option');
+            option.value = lang === 'de' ? key : zustandOptions[key];
+            option.textContent = key;
+            if ((lang === 'de' && key === selectedZustand) || (lang === 'en' && zustandOptions[key] === selectedZustand)) {
+                option.selected = true;
+            }
+            zustandSelect.appendChild(option);
+        });
+    }
     </script>
 
 </body>
