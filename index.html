@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Immobilien Klartext-Kosten-Rechner</title>
+    <title>Immobilien Kosten-Rechner</title>
     
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -231,10 +231,22 @@
             border: 1px solid var(--border-color);
             border-radius: 8px;
             transition: all 0.2s ease;
+            cursor: pointer;
+            user-select: none;
+            position: relative;
         }
         
         .sanierung-item:hover {
             background-color: #f8f9fa;
+            border-color: var(--primary-color);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 90, 156, 0.1);
+        }
+        
+        .sanierung-item.selected {
+            background-color: var(--primary-light);
+            border-color: var(--primary-color);
+            box-shadow: 0 2px 8px rgba(0, 90, 156, 0.15);
         }
         
         .sanierung-item input[type="checkbox"] {
@@ -333,6 +345,11 @@
             font-size: 1.3rem;
             margin-bottom: 1rem;
             font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-light) 0%, rgba(0, 90, 156, 0.15) 100%);
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary-color);
+            box-shadow: 0 2px 8px rgba(0, 90, 156, 0.1);
         }
         
         .klartext-urteil {
@@ -582,6 +599,8 @@
         .cost-breakdown li {
             display: flex;
             justify-content: space-between;
+            align-items: center;
+            min-height: 3rem;
             padding: 0.75rem 0;
             border-bottom: 1px solid #f1f3f5;
         }
@@ -801,8 +820,418 @@
             background-color: #004a80;
         }
         
+        /* Mobile Step Navigation */
+        .mobile-step-navigation {
+            display: none;
+        }
+        
+        .mobile-start-button {
+            display: none;
+        }
+        
+        .mobile-results-page {
+            display: none;
+        }
+        
+        @media (max-width: 991px) {
+            .mobile-step-navigation.active {
+                display: block;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.9);
+                z-index: 1000;
+                backdrop-filter: blur(5px);
+            }
+            
+            .step-modal {
+                position: absolute;
+                top: 2rem;
+                left: 1rem;
+                right: 1rem;
+                bottom: 2rem;
+                background: var(--white);
+                padding: 1.5rem;
+                border-radius: 12px;
+                overflow-y: auto;
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+                display: flex;
+                flex-direction: column;
+            }
+            
+            .step-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 1.5rem;
+                padding-bottom: 1rem;
+                border-bottom: 2px solid var(--border-color);
+                flex-shrink: 0;
+            }
+            
+            .step-content {
+                flex: 1;
+                overflow-y: auto;
+                padding-right: 0.5rem;
+            }
+            
+            .step-title {
+                font-size: 1.2rem;
+                font-weight: 700;
+                color: var(--primary-color);
+            }
+            
+            .step-close {
+                background: none;
+                border: none;
+                font-size: 1.5rem;
+                cursor: pointer;
+                padding: 0.5rem;
+                border-radius: 50%;
+                transition: background-color 0.2s;
+            }
+            
+            .step-close:hover {
+                background-color: var(--primary-light);
+            }
+            
+            .step-navigation {
+                display: flex;
+                justify-content: space-between;
+                margin-top: 2rem;
+                padding-top: 1rem;
+                border-top: 1px solid var(--border-color);
+                flex-shrink: 0;
+            }
+            
+            .step-nav-button {
+                padding: 0.75rem 1.5rem;
+                border: none;
+                border-radius: 8px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+            
+            .step-nav-button.primary {
+                background-color: var(--primary-color);
+                color: var(--white);
+            }
+            
+            .step-nav-button.primary:hover {
+                background-color: #004a80;
+            }
+            
+            .step-nav-button.secondary {
+                background-color: var(--border-color);
+                color: var(--text-color);
+            }
+            
+            .step-nav-button.secondary:hover {
+                background-color: #adb5bd;
+            }
+            
+            .step-nav-button:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+            
+            .mobile-start-button {
+                display: block !important;
+                position: fixed;
+                bottom: 2rem;
+                right: 2rem;
+                background-color: var(--primary-color);
+                color: var(--white);
+                border: none;
+                padding: 1rem 2rem;
+                border-radius: 50px;
+                font-weight: 700;
+                font-size: 1.1rem;
+                cursor: pointer;
+                box-shadow: 0 4px 20px rgba(0, 90, 156, 0.3);
+                transition: all 0.2s;
+                z-index: 100;
+            }
+            
+            .mobile-start-button:hover {
+                background-color: #004a80;
+                transform: translateY(-2px);
+                box-shadow: 0 6px 25px rgba(0, 90, 156, 0.4);
+            }
+            
+            .rechner-wrapper {
+                display: none;
+            }
+            
+            .rechner-wrapper.desktop-only {
+                display: block;
+            }
+            
+            .mobile-results-page.active {
+                display: block;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: var(--bg-color);
+                z-index: 1001;
+                overflow-y: auto;
+            }
+            
+            .mobile-results-container {
+                padding: 1rem;
+                max-width: 600px;
+                margin: 0 auto;
+            }
+            
+            .results-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 1rem 0 2rem 0;
+                border-bottom: 2px solid var(--border-color);
+                margin-bottom: 2rem;
+            }
+            
+            .results-header h2 {
+                color: var(--primary-color);
+                font-size: 1.5rem;
+                margin: 0;
+            }
+            
+            .results-close {
+                background: none;
+                border: none;
+                font-size: 2rem;
+                cursor: pointer;
+                padding: 0.5rem;
+                border-radius: 50%;
+                transition: background-color 0.2s;
+            }
+            
+            .results-close:hover {
+                background-color: var(--primary-light);
+            }
+            
+            .mobile-result-summary {
+                text-align: center;
+                padding: 2rem;
+                background: var(--white);
+                border-radius: 12px;
+                margin-bottom: 2rem;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            }
+            
+            .result-title {
+                font-size: 1rem;
+                color: #6c757d;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                margin-bottom: 1rem;
+            }
+            
+            .result-amount {
+                font-size: 2.5rem;
+                font-weight: 700;
+                color: var(--success-color);
+            }
+            
+            .mobile-verdict {
+                margin: 2rem 0;
+                padding: 2rem;
+                border-radius: 12px;
+                text-align: center;
+            }
+            
+            .mobile-breakdown {
+                background: var(--white);
+                border-radius: 12px;
+                padding: 1.5rem;
+                margin-bottom: 2rem;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            }
+            
+            .mobile-breakdown h3 {
+                color: var(--primary-color);
+                margin-bottom: 1rem;
+                font-size: 1.2rem;
+            }
+            
+            .breakdown-item {
+                display: flex;
+                justify-content: space-between;
+                padding: 0.75rem 0;
+                border-bottom: 1px solid var(--border-color);
+            }
+            
+            .breakdown-item:last-child {
+                border-bottom: none;
+                font-weight: 700;
+                font-size: 1.1rem;
+            }
+            
+            .mobile-results-actions {
+                display: flex;
+                gap: 1rem;
+                margin-top: 2rem;
+            }
+            
+            .mobile-action-button {
+                flex: 1;
+                padding: 1rem;
+                border: none;
+                border-radius: 8px;
+                font-weight: 600;
+                font-size: 1rem;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+            
+            .mobile-action-button.secondary {
+                background-color: var(--border-color);
+                color: var(--text-color);
+            }
+            
+            .mobile-action-button.secondary:hover {
+                background-color: #adb5bd;
+            }
+            
+            .mobile-action-button.primary {
+                background-color: var(--primary-color);
+                color: var(--white);
+            }
+            
+            .mobile-action-button.primary:hover {
+                background-color: #004a80;
+            }
+            
+            /* Mobile Tooltip Override */
+            .mobile-step-navigation .tooltip .tooltip-text {
+                position: fixed !important;
+                z-index: 2000 !important;
+                bottom: auto !important;
+                top: 50% !important;
+                left: 50% !important;
+                transform: translate(-50%, -50%) !important;
+                width: 80vw !important;
+                max-width: 300px !important;
+                background-color: rgba(0, 0, 0, 0.9) !important;
+                color: white !important;
+                border-radius: 8px !important;
+                padding: 1rem !important;
+                font-size: 0.9rem !important;
+                text-align: center !important;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+            }
+
+            /* Calendar Popup Styles */
+            .calendar-popup-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.8);
+                z-index: 10000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                opacity: 0;
+                visibility: hidden;
+                transition: all 0.3s ease;
+            }
+
+            .calendar-popup-overlay.active {
+                opacity: 1;
+                visibility: visible;
+            }
+
+            .calendar-popup-content {
+                background: var(--white);
+                border-radius: 16px;
+                width: 90vw;
+                max-width: 500px;
+                max-height: 90vh;
+                overflow-y: auto;
+                transform: scale(0.9);
+                transition: transform 0.3s ease;
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            }
+
+            .calendar-popup-overlay.active .calendar-popup-content {
+                transform: scale(1);
+            }
+
+            .calendar-popup-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 2rem 2rem 1rem 2rem;
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            .calendar-popup-header h3 {
+                color: var(--primary-color);
+                margin: 0;
+                font-size: 1.4rem;
+                font-weight: 700;
+            }
+
+            .calendar-close-btn {
+                background: none;
+                border: none;
+                font-size: 2rem;
+                color: #6c757d;
+                cursor: pointer;
+                padding: 0.5rem;
+                border-radius: 50%;
+                transition: all 0.2s;
+                width: 3rem;
+                height: 3rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .calendar-close-btn:hover {
+                background-color: var(--border-color);
+                color: var(--text-color);
+            }
+
+            .calendar-popup-body {
+                padding: 2rem;
+            }
+
+            .calendar-popup-body > p {
+                color: var(--text-color);
+                margin-bottom: 2rem;
+                font-size: 1.1rem;
+            }
+
+            .calendar-embed-container {
+                border-radius: 12px;
+                overflow: hidden;
+                background: #f8f9fa;
+                border: 1px solid var(--border-color);
+                min-height: 600px;
+            }
+
+            .calendar-embed-container iframe {
+                border-radius: 12px;
+            }
+
+            body.popup-open {
+                overflow: hidden;
+            }
+        }
+        
         /* Mobile Language Toggle */
-        @media (max-width: 768px) {
+        @media (max-width: 991px) {
             .language-toggle {
                 position: static;
                 margin: 0 auto 1rem auto;
@@ -839,9 +1268,79 @@
                     🇬🇧 EN
                 </button>
             </div>
-            <h1 data-de="Immobilien Klartext-Kosten-Rechner" data-en="Real Estate Truth Cost Calculator">Immobilien Klartext-Kosten-Rechner</h1>
+            <h1 data-de="Immobilien Kosten-Rechner" data-en="Real Estate Truth Cost Calculator">Immobilien Kosten-Rechner</h1>
             <p data-de="Kannst du dir das leisten? Das ist die einzige Frage, die dir die Bank am Ende stellen wird." data-en="Can you afford it? That's the only question the bank will ask you in the end.">Kannst du dir das leisten? Das ist die einzige Frage, die dir die Bank am Ende stellen wird.</p>
         </header>
+
+        <!-- Mobile Step Navigation -->
+        <div class="mobile-step-navigation" id="mobile-step-navigation">
+            <div class="step-modal">
+                <div class="step-header">
+                    <div class="step-title" id="step-title">Schritt 1</div>
+                    <button class="step-close" onclick="closeMobileSteps()">&times;</button>
+                </div>
+                <div class="step-content" id="step-content">
+                    <!-- Content wird dynamisch eingefügt -->
+                </div>
+                <div class="step-navigation">
+                    <button class="step-nav-button secondary" id="prev-button" onclick="previousStep()" data-de="Zurück" data-en="Back">Zurück</button>
+                    <button class="step-nav-button primary" id="next-button" onclick="nextStep()" data-de="Weiter" data-en="Next">Weiter</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Start Button -->
+        <button class="mobile-start-button" id="mobile-start-button" onclick="startMobileSteps()" data-de="Rechner starten" data-en="Start Calculator">Rechner starten</button>
+
+        <!-- Mobile Results Page -->
+        <div class="mobile-results-page" id="mobile-results-page">
+            <div class="mobile-results-container">
+                <div class="results-header">
+                    <h2 data-de="Ihr Ergebnis" data-en="Your Result">Ihr Ergebnis</h2>
+                    <button class="results-close" onclick="closeMobileResults()">&times;</button>
+                </div>
+                
+                <div class="mobile-results-content">
+                    <!-- Hauptergebnis -->
+                    <div class="mobile-result-summary">
+                        <div class="result-title" data-de="Monatliche Gesamtbelastung" data-en="Total Monthly Burden">Monatliche Gesamtbelastung</div>
+                        <div id="mobile-monthly-total" class="result-amount">0 € / Monat</div>
+                    </div>
+                    
+                    <!-- Klartext-Urteil -->
+                    <div id="mobile-klartext-result" class="mobile-verdict">
+                        <!-- Wird dynamisch befüllt -->
+                    </div>
+                    
+                    <!-- Kostenaufschlüsselung -->
+                    <div class="mobile-breakdown">
+                        <h3 data-de="Aufschlüsselung" data-en="Breakdown">Aufschlüsselung</h3>
+                        <div class="breakdown-item">
+                            <span data-de="Finanzierung" data-en="Financing">Finanzierung</span>
+                            <span id="mobile-result-financing">0 €</span>
+                        </div>
+                        <div class="breakdown-item">
+                            <span data-de="Hausgeld" data-en="Maintenance">Hausgeld</span>
+                            <span id="mobile-result-hausgeld">0 €</span>
+                        </div>
+                        <div class="breakdown-item">
+                            <span data-de="Grundsteuer" data-en="Property Tax">Grundsteuer</span>
+                            <span id="mobile-result-grundsteuer">0 €</span>
+                        </div>
+                        <div class="breakdown-item">
+                            <span data-de="Instandhaltung" data-en="Maintenance Reserve">Instandhaltung</span>
+                            <span id="mobile-result-instandhaltung">0 €</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="mobile-results-actions">
+                        <button class="mobile-action-button secondary" onclick="restartMobileQuiz()" data-de="Neu berechnen" data-en="Recalculate">Neu berechnen</button>
+                        <button class="mobile-action-button primary" onclick="showMobileContact()" data-de="Beratung anfragen" data-en="Request Consultation">Beratung anfragen</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <main class="rechner-wrapper">
             <!-- Eingabe-Sektion -->
@@ -1039,12 +1538,12 @@
         };
 
         const sanierungsOptionen = [
-            { id: 'heizung', title: 'Heizung erneuern (Pflicht nach GEG bei Kauf!)', cost: 25000 },
-            { id: 'fenster', title: 'Fenster (Doppelverglasung, alt)', cost: 15000 },
-            { id: 'dach', title: 'Dach dämmen', cost: 20000 },
-            { id: 'bad', title: 'Bad sanieren (älter als 20 Jahre)', cost: 12000 },
-            { id: 'elektrik', title: 'Elektrik erneuern (2-adrig)', cost: 10000 },
-            { id: 'maler', title: 'Malerarbeiten & Böden', cost: 8000 }
+            { id: 'heizung', title: { de: 'Heizung erneuern (Pflicht nach GEG bei Kauf!)', en: 'Renew heating (mandatory per GEG when buying!)' }, cost: 25000 },
+            { id: 'fenster', title: { de: 'Fenster (Doppelverglasung, alt)', en: 'Windows (double glazing, old)' }, cost: 15000 },
+            { id: 'dach', title: { de: 'Dach dämmen', en: 'Insulate roof' }, cost: 20000 },
+            { id: 'bad', title: { de: 'Bad sanieren (älter als 20 Jahre)', en: 'Renovate bathroom (older than 20 years)' }, cost: 12000 },
+            { id: 'elektrik', title: { de: 'Elektrik erneuern (2-adrig)', en: 'Renew electrical (2-wire)' }, cost: 10000 },
+            { id: 'maler', title: { de: 'Malerarbeiten & Böden', en: 'Painting & flooring' }, cost: 8000 }
         ];
         
         // Konstanten für Berechnungen
@@ -1141,13 +1640,42 @@
                 itemDiv.innerHTML = `
                     <input type="checkbox" id="sanierung-${option.id}" name="sanierung" value="${option.id}">
                     <div class="sanierung-details">
-                        <div class="sanierung-title">${option.title}</div>
+                        <div class="sanierung-title" data-de="${option.title.de}" data-en="${option.title.en}">${option.title.de}</div>
                         <div class="sanierung-cost">+ ${formatCurrency(option.cost)}</div>
                     </div>
                 `;
                 
+                // Add click event listener to the entire item
+                itemDiv.addEventListener('click', function(e) {
+                    // Don't trigger if the checkbox itself was clicked
+                    if (e.target.type === 'checkbox') return;
+                    
+                    const checkbox = itemDiv.querySelector('input[type="checkbox"]');
+                    checkbox.checked = !checkbox.checked;
+                    
+                    // Update visual state
+                    updateSanierungItemState(itemDiv, checkbox.checked);
+                    
+                    // Trigger calculation update
+                    calculateAndDisplay();
+                });
+                
+                // Add change event listener to checkbox for direct checkbox clicks
+                const checkbox = itemDiv.querySelector('input[type="checkbox"]');
+                checkbox.addEventListener('change', function() {
+                    updateSanierungItemState(itemDiv, this.checked);
+                });
+                
                 sanierungCheckboxes.appendChild(itemDiv);
             });
+        }
+        
+        function updateSanierungItemState(itemDiv, isChecked) {
+            if (isChecked) {
+                itemDiv.classList.add('selected');
+            } else {
+                itemDiv.classList.remove('selected');
+            }
         }
         
         function updateKaufpreisDisplay() {
@@ -1543,6 +2071,12 @@
         if (klartextUrteilDiv.classList.contains('visible')) {
             calculateBelastungsquote();
         }
+        
+        // Update mobile step navigation language
+        updateMobileStepLanguage(lang);
+        
+        // Update calendar popup language
+        updateCalendarLanguage();
     }
     
     function updateChartLanguage(lang) {
@@ -1554,6 +2088,659 @@
             costChart.data.labels = labels;
             costChart.update();
         }
+    }
+    
+    // --- MOBILE STEP NAVIGATION ---
+    let currentStep = 0;
+    const mobileSteps = [
+        {
+            title: { de: 'Schritt 1: Kaufpreis', en: 'Step 1: Purchase Price' },
+            fields: ['kaufpreis']
+        },
+        {
+            title: { de: 'Schritt 2: Wohnfläche', en: 'Step 2: Living Space' },
+            fields: ['wohnflaeche']
+        },
+        {
+            title: { de: 'Schritt 3: Eigenkapital', en: 'Step 3: Equity' },
+            fields: ['eigenkapital']
+        },
+        {
+            title: { de: 'Schritt 4: Bundesland', en: 'Step 4: German State' },
+            fields: ['bundesland']
+        },
+        {
+            title: { de: 'Schritt 5: Makler', en: 'Step 5: Real Estate Agent' },
+            fields: ['mitMakler']
+        },
+        {
+            title: { de: 'Schritt 6: Sanierungen', en: 'Step 6: Renovations' },
+            fields: ['sanierung-checkboxes']
+        },
+        {
+            title: { de: 'Schritt 7: Zinssatz', en: 'Step 7: Interest Rate' },
+            fields: ['zinssatz']
+        },
+        {
+            title: { de: 'Schritt 8: Tilgung', en: 'Step 8: Repayment' },
+            fields: ['tilgung']
+        },
+        {
+            title: { de: 'Schritt 9: Hausgeld', en: 'Step 9: Maintenance Fees' },
+            fields: ['hausgeld']
+        },
+        {
+            title: { de: 'Schritt 10: Grundsteuer', en: 'Step 10: Property Tax' },
+            fields: ['grundsteuer']
+        },
+        {
+            title: { de: 'Schritt 11: Ihr Einkommen', en: 'Step 11: Your Income' },
+            fields: ['nettoeinkommen']
+        }
+    ];
+    
+    function startMobileSteps() {
+        console.log('🚀 startMobileSteps() called');
+        
+        // Ensure DOM is fully ready and form elements are loaded
+        function waitForFormElements() {
+            const kaufpreisElement = document.getElementById('kaufpreis');
+            console.log('🔍 Checking for kaufpreis element:', kaufpreisElement);
+            
+            if (kaufpreisElement) {
+                console.log('✅ Form elements ready, starting quiz');
+                currentStep = 0;
+                const navigation = document.getElementById('mobile-step-navigation');
+                console.log('📱 Navigation element:', navigation);
+                navigation.classList.add('active');
+                console.log('✅ Added active class to navigation');
+                
+                console.log('📋 Calling showMobileStep(0)');
+                showMobileStep(currentStep);
+            } else {
+                console.log('⏳ Form elements not ready yet, waiting...');
+                setTimeout(waitForFormElements, 50);
+            }
+        }
+        
+        waitForFormElements();
+    }
+    
+    function closeMobileSteps() {
+        const navigation = document.getElementById('mobile-step-navigation');
+        navigation.classList.remove('active');
+    }
+    
+    function nextStep() {
+        console.log(`🚀 nextStep() called, currentStep: ${currentStep}, maxSteps: ${mobileSteps.length}`);
+        
+        // Validierung für Schritt 11 (Nettoeinkommen)
+        if (currentStep === 10) {
+            console.log('💰 Validating Nettoeinkommen (step 11)...');
+            const nettoeinkommenInput = document.getElementById('mobile-nettoeinkommen') || document.getElementById('nettoeinkommen');
+            console.log('📊 Nettoeinkommen input element:', nettoeinkommenInput);
+            const nettoeinkommen = parseFloat(nettoeinkommenInput?.value) || 0;
+            console.log('💵 Nettoeinkommen value:', nettoeinkommen);
+            
+            if (nettoeinkommen <= 0) {
+                console.log('❌ Validation failed - no income entered');
+                // Fehlermeldung anzeigen
+                showMobileValidationError(currentLanguage === 'de' 
+                    ? 'Bitte geben Sie Ihr monatliches Nettoeinkommen ein, um das Ergebnis zu sehen.'
+                    : 'Please enter your monthly net income to see the result.');
+                return;
+            } else {
+                console.log('✅ Validation passed - income is valid');
+                // Fehlermeldung verstecken falls sichtbar
+                hideMobileValidationError();
+            }
+        }
+        
+        if (currentStep < mobileSteps.length - 1) {
+            console.log(`➡️ Moving to next step: ${currentStep + 1}`);
+            currentStep++;
+            showMobileStep(currentStep);
+        } else {
+            console.log('🏁 Reached final step - showing results');
+            console.log('🚪 Closing mobile steps...');
+            closeMobileSteps();
+            console.log('📊 Scrolling to results...');
+            scrollToResults();
+        }
+    }
+    
+    function previousStep() {
+        if (currentStep > 0) {
+            currentStep--;
+            showMobileStep(currentStep);
+        }
+    }
+    
+    function showMobileStep(stepIndex) {
+        console.log(`🔥 showMobileStep(${stepIndex}) called`);
+        
+        const step = mobileSteps[stepIndex];
+        console.log('📝 Current step data:', step);
+        
+        const stepTitle = document.getElementById('step-title');
+        const stepContent = document.getElementById('step-content');
+        const prevButton = document.getElementById('prev-button');
+        const nextButton = document.getElementById('next-button');
+        
+        console.log('🎯 DOM elements:', {
+            stepTitle,
+            stepContent,
+            prevButton,
+            nextButton
+        });
+        
+        // Update title
+        const titleText = step.title[currentLanguage || 'de'];
+        console.log(`📰 Setting title to: "${titleText}" (language: ${currentLanguage || 'de'})`);
+        stepTitle.textContent = titleText;
+        
+        // Clear content
+        console.log('🗑️ Clearing step content');
+        stepContent.innerHTML = '';
+        
+        // Wait a moment to ensure DOM is fully loaded
+        setTimeout(() => {
+            console.log('⏰ Fields processing timeout started');
+            console.log(`🔍 Processing ${step.fields.length} fields:`, step.fields);
+            
+            // Add fields for this step
+            step.fields.forEach((fieldId, index) => {
+                console.log(`\n🔎 [${index + 1}/${step.fields.length}] Processing field: "${fieldId}"`);
+                
+                let originalElement = document.getElementById(fieldId);
+                console.log(`📍 Original element by ID "${fieldId}":`, originalElement);
+                
+                let fieldGroup;
+                
+                // Special handling for different field types
+                if (fieldId === 'sanierung-checkboxes') {
+                    fieldGroup = document.getElementById('sanierung-checkboxes');
+                    console.log('🏗️ Sanierung checkboxes field group:', fieldGroup);
+                } else if (fieldId === 'mitMakler') {
+                    // For makler, get the form-group that contains both checkbox and provision rate
+                    originalElement = document.getElementById('mitMakler');
+                    if (originalElement) {
+                        // The form-group already contains both the checkbox and the provision rate wrapper
+                        fieldGroup = originalElement.closest('.form-group');
+                    }
+                    console.log('🏢 Makler field group (complete):', fieldGroup);
+                } else {
+                    if (!originalElement) {
+                        console.log(`🔍 Element "${fieldId}" not found, trying wildcard search...`);
+                        originalElement = document.querySelector(`[id*="${fieldId}"]`);
+                        console.log('🔍 Wildcard search result:', originalElement);
+                    }
+                    if (originalElement) {
+                        fieldGroup = originalElement.closest('.form-group');
+                        console.log('📦 Found form group:', fieldGroup);
+                    } else {
+                        console.log('❌ No original element found for:', fieldId);
+                    }
+                }
+                
+                if (fieldGroup) {
+                    console.log('✅ Cloning field group...');
+                    const clone = fieldGroup.cloneNode(true);
+                    
+                    console.log('🏷️ Updating IDs...');
+                    updateClonedIds(clone, 'mobile-');
+                    
+                    console.log('🔗 Adding event listeners...');
+                    addMobileEventListeners(clone, fieldId);
+                    
+                    console.log('🔄 Syncing live values...');
+                    syncInitialLiveValues(clone);
+                    
+                    console.log('📱 Adding mobile tooltip functionality...');
+                    addMobileTooltipListeners(clone);
+                    
+                    console.log('➕ Appending to step content...');
+                    stepContent.appendChild(clone);
+                    
+                    console.log(`✅ Successfully added field "${fieldId}" to step content`);
+                } else {
+                    console.error(`❌ No field group found for: "${fieldId}"`);
+                    console.log('🔍 Available form groups:', document.querySelectorAll('.form-group'));
+                }
+            });
+            
+            console.log('✨ Finished processing all fields');
+            console.log('📄 Final step content HTML length:', stepContent.innerHTML.length);
+            console.log('👀 Step content children count:', stepContent.children.length);
+        }, 50);
+        
+        // Update navigation buttons
+        prevButton.style.display = stepIndex === 0 ? 'none' : 'block';
+        nextButton.textContent = stepIndex === mobileSteps.length - 1 
+            ? (currentLanguage === 'de' ? 'Ergebnis ansehen' : 'View Results')
+            : (currentLanguage === 'de' ? 'Weiter' : 'Next');
+            
+        // Also update button language attributes
+        const currentLang = currentLanguage || 'de';
+        prevButton.textContent = currentLang === 'de' ? 'Zurück' : 'Back';
+        nextButton.textContent = stepIndex === mobileSteps.length - 1 
+            ? (currentLang === 'de' ? 'Ergebnis ansehen' : 'View Results')
+            : (currentLang === 'de' ? 'Weiter' : 'Next');
+    }
+    
+    function updateClonedIds(element, prefix) {
+        if (element.id) {
+            element.id = prefix + element.id;
+        }
+        
+        // Update for attribute of labels
+        const labels = element.querySelectorAll('label[for]');
+        labels.forEach(label => {
+            if (label.getAttribute('for')) {
+                label.setAttribute('for', prefix + label.getAttribute('for'));
+            }
+        });
+        
+        // Update IDs of input elements
+        const inputs = element.querySelectorAll('[id]');
+        inputs.forEach(input => {
+            if (input.id) {
+                input.id = prefix + input.id;
+            }
+        });
+    }
+    
+    function addMobileEventListeners(clone, originalFieldId) {
+        const inputs = clone.querySelectorAll('input, select');
+        inputs.forEach(input => {
+            const originalId = input.id.replace('mobile-', '');
+            const originalInput = document.getElementById(originalId);
+            
+            if (originalInput) {
+                // Sync value from original
+                if (input.type === 'checkbox') {
+                    input.checked = originalInput.checked;
+                } else {
+                    input.value = originalInput.value;
+                }
+                
+                // Add event listener to sync back
+                input.addEventListener('input', function() {
+                    if (originalInput.type === 'checkbox') {
+                        originalInput.checked = this.checked;
+                    } else {
+                        originalInput.value = this.value;
+                    }
+                    
+                    // Trigger original calculation
+                    originalInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    
+                    // Update live value display if it exists
+                    const liveValueElement = clone.querySelector(`#mobile-${originalId}-value`);
+                    const originalLiveValue = document.getElementById(`${originalId}-value`);
+                    if (liveValueElement && originalLiveValue) {
+                        liveValueElement.textContent = originalLiveValue.textContent;
+                    }
+                    
+                    // Validierung für Nettoeinkommen
+                    if (originalId === 'nettoeinkommen' && currentStep === 10) {
+                        const nettoeinkommen = parseFloat(this.value) || 0;
+                        if (nettoeinkommen > 0) {
+                            hideMobileValidationError();
+                        }
+                    }
+                });
+                
+                input.addEventListener('change', function() {
+                    if (originalInput.type === 'checkbox') {
+                        originalInput.checked = this.checked;
+                    } else {
+                        originalInput.value = this.value;
+                    }
+                    
+                    // Trigger original calculation
+                    originalInput.dispatchEvent(new Event('change', { bubbles: true }));
+                });
+            }
+        });
+        
+        // Handle sanierung checkboxes specially
+        if (originalFieldId.includes('sanierung')) {
+            const sanierungItems = clone.querySelectorAll('.sanierung-item');
+            sanierungItems.forEach(item => {
+                const checkbox = item.querySelector('input[type="checkbox"]');
+                if (checkbox) {
+                    const originalCheckbox = document.getElementById(checkbox.id.replace('mobile-', ''));
+                    if (originalCheckbox) {
+                        checkbox.checked = originalCheckbox.checked;
+                        
+                        item.addEventListener('click', function(e) {
+                            if (e.target.type === 'checkbox') return;
+                            checkbox.checked = !checkbox.checked;
+                            originalCheckbox.checked = checkbox.checked;
+                            originalCheckbox.dispatchEvent(new Event('change', { bubbles: true }));
+                        });
+                        
+                        checkbox.addEventListener('change', function() {
+                            originalCheckbox.checked = this.checked;
+                            originalCheckbox.dispatchEvent(new Event('change', { bubbles: true }));
+                        });
+                    }
+                }
+            });
+        }
+    }
+    
+    function scrollToResults() {
+        console.log('📊 scrollToResults() called - showing mobile results page');
+        showMobileResults();
+    }
+    
+    function showMobileResults() {
+        // Calculate current values
+        const results = calculateCurrentResults();
+        
+        // Update mobile results page
+        updateMobileResults(results);
+        
+        // Show mobile results page
+        const mobileResults = document.getElementById('mobile-results-page');
+        mobileResults.classList.add('active');
+    }
+    
+    function calculateCurrentResults() {
+        // Get current form values (similar to calculateAndDisplay but return values)
+        const kaufpreis = parseFloat(document.getElementById('kaufpreis').value) || 0;
+        const wohnflaeche = parseFloat(document.getElementById('wohnflaeche').value) || 0;
+        const eigenkapital = parseFloat(document.getElementById('eigenkapital').value) || 0;
+        const nettoeinkommen = parseFloat(document.getElementById('nettoeinkommen').value) || 0;
+        const zinssatz = parseFloat(document.getElementById('zinssatz').value) / 100 || 0;
+        const tilgung = parseFloat(document.getElementById('tilgung').value) / 100 || 0;
+        const hausgeld = parseFloat(document.getElementById('hausgeld').value) || 0;
+        const grundsteuerJahr = parseFloat(document.getElementById('grundsteuer').value) || 0;
+        
+        // Calculate monthly costs
+        const finanzierungsbedarf = Math.max(0, kaufpreis - eigenkapital); // Simplified
+        const monatlicheRate = finanzierungsbedarf * (zinssatz + tilgung) / 12;
+        const grundsteuerMonatlich = grundsteuerJahr / 12;
+        const instandhaltung = wohnflaeche * 1; // €/m²/Monat
+        const monatlicheGesamtbelastung = monatlicheRate + hausgeld + grundsteuerMonatlich + instandhaltung;
+        
+        // Calculate Belastungsquote
+        const belastungsquote = nettoeinkommen > 0 ? (monatlicheGesamtbelastung / nettoeinkommen) * 100 : 0;
+        
+        return {
+            monatlicheGesamtbelastung,
+            monatlicheRate,
+            hausgeld,
+            grundsteuerMonatlich,
+            instandhaltung,
+            belastungsquote,
+            nettoeinkommen
+        };
+    }
+    
+    // Helper function for mobile results (since formatCurrency is in DOMContentLoaded)
+    function formatCurrencyMobile(value) {
+        return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 }).format(value);
+    }
+    
+    function updateMobileResults(results) {
+        // Update main result
+        document.getElementById('mobile-monthly-total').textContent = 
+            formatCurrencyMobile(results.monatlicheGesamtbelastung) + ' / Monat';
+        
+        // Update breakdown
+        document.getElementById('mobile-result-financing').textContent = 
+            formatCurrencyMobile(results.monatlicheRate) + ' / Monat';
+        document.getElementById('mobile-result-hausgeld').textContent = 
+            formatCurrencyMobile(results.hausgeld) + ' / Monat';
+        document.getElementById('mobile-result-grundsteuer').textContent = 
+            formatCurrencyMobile(results.grundsteuerMonatlich) + ' / Monat';
+        document.getElementById('mobile-result-instandhaltung').textContent = 
+            formatCurrencyMobile(results.instandhaltung) + ' / Monat';
+        
+        // Update verdict
+        updateMobileVerdict(results.belastungsquote);
+    }
+    
+    function updateMobileVerdict(belastungsquote) {
+        const verdictDiv = document.getElementById('mobile-klartext-result');
+        
+        let urteilClass, icon, text, beschreibung;
+        
+        if (belastungsquote < 38) {
+            urteilClass = 'urteil-gruen';
+            icon = '✅';
+            text = currentLanguage === 'de' ? 'Grüner Bereich' : 'Green Zone';
+            beschreibung = currentLanguage === 'de' 
+                ? 'Das sieht solide aus. Banken bewerten eine solche Quote positiv.'
+                : 'This looks solid. Banks rate such a quota positively.';
+        } else if (belastungsquote <= 45) {
+            urteilClass = 'urteil-gelb';
+            icon = '⚠️';
+            text = currentLanguage === 'de' ? 'Sportlich' : 'Challenging';
+            beschreibung = currentLanguage === 'de'
+                ? 'Das ist machbar, aber die Bank wird genau prüfen.'
+                : 'This is feasible, but the bank will examine closely.';
+        } else {
+            urteilClass = 'urteil-rot';
+            icon = '🛑';
+            text = currentLanguage === 'de' ? 'Kritisch' : 'Critical';
+            beschreibung = currentLanguage === 'de'
+                ? 'Das ist für die meisten Haushalte nicht tragbar.'
+                : 'This is not sustainable for most households.';
+        }
+        
+        verdictDiv.className = `mobile-verdict ${urteilClass}`;
+        verdictDiv.innerHTML = `
+            <div style="font-size: 3rem; margin-bottom: 1rem;">${icon}</div>
+            <div style="font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem;">${belastungsquote.toFixed(1)}%</div>
+            <div style="font-size: 1.2rem; font-weight: 600; margin-bottom: 1rem;">${text}</div>
+            <div style="font-size: 1rem; line-height: 1.5;">${beschreibung}</div>
+        `;
+    }
+    
+    function closeMobileResults() {
+        const mobileResults = document.getElementById('mobile-results-page');
+        mobileResults.classList.remove('active');
+    }
+    
+    function restartMobileQuiz() {
+        closeMobileResults();
+        startMobileSteps();
+    }
+    
+    function showMobileContact() {
+        showCalendarPopup();
+    }
+    
+    function showCalendarPopup() {
+        // Create calendar popup if it doesn't exist
+        let calendarPopup = document.getElementById('calendar-popup');
+        if (!calendarPopup) {
+            calendarPopup = document.createElement('div');
+            calendarPopup.id = 'calendar-popup';
+            calendarPopup.className = 'calendar-popup-overlay';
+            calendarPopup.innerHTML = `
+                <div class="calendar-popup-content">
+                    <div class="calendar-popup-header">
+                        <h3 data-de="Beratungstermin vereinbaren" data-en="Schedule Consultation">Beratungstermin vereinbaren</h3>
+                        <button class="calendar-close-btn" onclick="closeCalendarPopup()">&times;</button>
+                    </div>
+                    <div class="calendar-popup-body">
+                        <p data-de="Buchen Sie Ihren kostenlosen Beratungstermin:" data-en="Book your free consultation:">Buchen Sie Ihren kostenlosen Beratungstermin:</p>
+                        
+                        <!-- LeadConnector Calendar embed -->
+                        <div class="calendar-embed-container">
+                            <iframe src="https://api.leadconnectorhq.com/widget/booking/kq7NmcLVgdbnxChd37gh" 
+                                    style="width: 100%; height: 600px; border: none; overflow: hidden;" 
+                                    scrolling="no" 
+                                    id="leadconnector-calendar">
+                            </iframe>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(calendarPopup);
+        }
+        
+        // Load LeadConnector script if not already loaded
+        if (!document.querySelector('script[src*="form_embed.js"]')) {
+            const script = document.createElement('script');
+            script.src = 'https://link.msgsndr.com/js/form_embed.js';
+            script.type = 'text/javascript';
+            document.head.appendChild(script);
+        }
+        
+        // Update language
+        updateCalendarLanguage();
+        
+        // Show popup
+        calendarPopup.classList.add('active');
+        document.body.classList.add('popup-open');
+    }
+    
+    function closeCalendarPopup() {
+        const calendarPopup = document.getElementById('calendar-popup');
+        if (calendarPopup) {
+            calendarPopup.classList.remove('active');
+            document.body.classList.remove('popup-open');
+        }
+    }
+    
+    
+    function updateCalendarLanguage() {
+        const calendarPopup = document.getElementById('calendar-popup');
+        if (calendarPopup) {
+            const elementsWithLang = calendarPopup.querySelectorAll('[data-de]');
+            elementsWithLang.forEach(element => {
+                const text = element.getAttribute(`data-${currentLanguage}`);
+                if (text) {
+                    element.textContent = text;
+                }
+            });
+        }
+    }
+    
+    function updateMobileStepLanguage(lang) {
+        // Update mobile navigation if open
+        const navigation = document.getElementById('mobile-step-navigation');
+        if (navigation.classList.contains('active')) {
+            showMobileStep(currentStep);
+        }
+    }
+    
+    function showMobileValidationError(message) {
+        // Entferne vorherige Fehlermeldung falls vorhanden
+        hideMobileValidationError();
+        
+        const stepContent = document.getElementById('step-content');
+        const errorDiv = document.createElement('div');
+        errorDiv.id = 'mobile-validation-error';
+        errorDiv.style.cssText = `
+            background-color: #f8d7da;
+            border: 1px solid #dc3545;
+            color: #721c24;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            font-weight: 600;
+        `;
+        errorDiv.textContent = message;
+        
+        stepContent.appendChild(errorDiv);
+        
+        // Scroll zur Fehlermeldung
+        errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    
+    function hideMobileValidationError() {
+        const errorDiv = document.getElementById('mobile-validation-error');
+        if (errorDiv) {
+            errorDiv.remove();
+        }
+    }
+    
+    function syncInitialLiveValues(clone) {
+        // Find all live value elements in the clone and sync them
+        const liveValueElements = clone.querySelectorAll('.live-value');
+        liveValueElements.forEach(liveValue => {
+            const originalId = liveValue.id.replace('mobile-', '');
+            const originalLiveValue = document.getElementById(originalId);
+            if (originalLiveValue) {
+                liveValue.textContent = originalLiveValue.textContent;
+            }
+        });
+    }
+    
+    function addMobileTooltipListeners(clone) {
+        console.log('🔍 addMobileTooltipListeners called for clone:', clone);
+        
+        // Find all tooltips in the cloned element
+        const tooltips = clone.querySelectorAll('.tooltip');
+        console.log(`💡 Found ${tooltips.length} tooltips in clone:`, tooltips);
+        
+        tooltips.forEach((tooltip, index) => {
+            console.log(`🎯 Processing tooltip ${index + 1}:`, tooltip);
+            
+            const tooltipText = tooltip.querySelector('.tooltip-text');
+            console.log(`📝 Tooltip text element:`, tooltipText);
+            
+            if (tooltipText) {
+                console.log('✅ Adding click listener to tooltip');
+                
+                // Add click event for mobile - use higher priority
+                tooltip.addEventListener('click', function(e) {
+                    console.log('👆 Tooltip clicked!', tooltip);
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    
+                    console.log('🔄 Current tooltip visibility:', tooltipText.style.visibility);
+                    
+                    // Toggle visibility
+                    if (tooltipText.style.visibility === 'visible') {
+                        console.log('👻 Hiding tooltip');
+                        tooltipText.style.visibility = 'hidden';
+                        tooltipText.style.opacity = '0';
+                    } else {
+                        console.log('👁️ Showing tooltip');
+                        
+                        // Hide all other tooltips first
+                        clone.querySelectorAll('.tooltip-text').forEach(otherTooltip => {
+                            otherTooltip.style.visibility = 'hidden';
+                            otherTooltip.style.opacity = '0';
+                        });
+                        
+                        // Show this tooltip
+                        tooltipText.style.visibility = 'visible';
+                        tooltipText.style.opacity = '1';
+                        
+                        console.log('⏰ Setting auto-hide timer (4s)');
+                        // Auto-hide after 4 seconds
+                        setTimeout(() => {
+                            console.log('⏰ Auto-hiding tooltip');
+                            tooltipText.style.visibility = 'hidden';
+                            tooltipText.style.opacity = '0';
+                        }, 4000);
+                    }
+                });
+                
+                // Add touch event for better mobile support
+                tooltip.addEventListener('touchstart', function(e) {
+                    console.log('👆 Tooltip touched!', tooltip);
+                    e.preventDefault();
+                    tooltip.click();
+                });
+                
+                console.log(`✅ Added listeners to tooltip ${index + 1}`);
+            } else {
+                console.log(`❌ No tooltip-text found in tooltip ${index + 1}`);
+            }
+        });
+        
+        console.log('🏁 Finished adding tooltip listeners');
     }
     
     </script>

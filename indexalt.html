@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Immobilien Immobilien-Kosten-Rechner</title>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* --- Grundlegende Stile & Variablen --- */
+        :root {
+            --bg-color: #F8F9FA;
+            --primary-color: #005A9C; /* Seriöses Blau */
+            --primary-light: #e6f0f7;
+            --text-color: #212529;
+            --success-color: #198754; /* Dunkles Grün */
+            --warning-color: #FD7E14; /* Warmes Orange */
+            --warning-light: #ffe8d4;
+            --border-color: #DEE2E6;
+            --white: #FFFFFF;
+            --font-family: 'Inter', sans-serif;
+        }
+
+        /* --- Reset & Body --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 2rem 1rem;
+        }
+
+        /* --- Hauptcontainer & Layout --- */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        header {
+            padding: 2rem;
+            border-bottom: 1px solid var(--border-color);
+            text-align: center;
+            position: relative;
+        }
+
+        header h1 {
+            color: var(--primary-color);
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            font-size: 1.1rem;
+            color: #6c757d;
+        }
+        
+        .rechner-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .input-section, .output-section {
+            padding: 2rem;
+            width: 100%;
+        }
+
+        .input-section {
+            background-color: #fdfdff;
+        }
+        
+        /* --- Formular-Elemente --- */
+        .form-group {
+            margin-bottom: 2rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-group .label-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .form-group .live-value {
+            font-weight: 700;
+            color: var(--primary-color);
+            font-size: 1.1rem;
+            background-color: var(--primary-light);
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+        }
+
+        .form-group .info-text {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-top: 0.25rem;
+        }
+
+        input[type="number"], select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: var(--font-family);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input[type="number"]:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 90, 156, 0.2);
+        }
+
+        /* Slider Stile */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 5px;
+            outline: none;
+            margin-top: 0.5rem;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--primary-color);
+            cursor: pointer;
+            border-radius: 50%;
+            border: 2px solid var(--white);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: var(--primary-color);
+            cursor: pointer;
+            border-radius: 50%;
+            border: 2px solid var(--white);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        /* Checkbox Stile */
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .checkbox-group input[type="checkbox"] {
+            width: 1.25em;
+            height: 1.25em;
+            accent-color: var(--primary-color);
+        }
+        
+        .makler-provision-rate {
+            transition: opacity 0.3s, transform 0.3s;
+            transform: translateY(-10px);
+            opacity: 0;
+            height: 0;
+            overflow: hidden;
+        }
+        
+        .makler-provision-rate.visible {
+            transform: translateY(0);
+            opacity: 1;
+            height: auto;
+            margin-top: 1rem;
+        }
+
+        /* --- Output / Ergebnis-Sektion --- */
+        .output-section {
+            background-color: var(--white);
+            border-left: 1px solid var(--border-color);
+        }
+        
+        .results-summary {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+        
+        .results-summary h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .results-summary .total-investment {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--success-color);
+            margin: 0.5rem 0;
+        }
+        
+        .results-summary .financing-needed {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 280px;
+            width: 280px;
+            margin: 0 auto 2.5rem auto;
+        }
+        
+        .cost-breakdown ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .cost-breakdown li {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #f1f3f5;
+        }
+        
+        .cost-breakdown li:last-child {
+            border-bottom: none;
+        }
+        
+        .cost-breakdown .cost-label {
+            color: #495057;
+        }
+        
+        .cost-breakdown .cost-value {
+            font-weight: 600;
+        }
+        
+        .cost-breakdown .highlight {
+            color: var(--warning-color);
+        }
+        
+        .cost-breakdown .total {
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding-top: 1rem;
+        }
+        
+        .cost-breakdown .final-total .cost-value {
+            color: var(--success-color);
+        }
+        
+        hr.divider {
+            border: 0;
+            height: 1px;
+            background-color: var(--border-color);
+            margin: 1rem 0;
+        }
+
+        /* --- CTA Sektion --- */
+        .cta-section {
+            background-color: var(--primary-light);
+            padding: 2.5rem;
+            text-align: center;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .cta-section h2 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .cta-section p {
+            max-width: 600px;
+            margin: 0 auto 1.5rem auto;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: var(--white);
+            padding: 0.8rem 2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background-color 0.2s, transform 0.2s;
+            box-shadow: 0 4px 15px rgba(0, 90, 156, 0.2);
+        }
+        
+        .cta-button:hover {
+            background-color: #004a80;
+            transform: translateY(-2px);
+        }
+        
+        .cta-buyer-form {
+            margin-top: 2rem;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .cta-buyer-form p {
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .cta-buyer-form .form-inline {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .cta-buyer-form input[type="email"] {
+            flex-grow: 1;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
+        
+        .cta-buyer-form button {
+            background-color: var(--success-color);
+            color: var(--white);
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+        
+        .cta-buyer-form button:hover {
+            background-color: #146c43;
+        }
+        
+        /* --- Vertrauensfoto & Kalendertermin --- */
+        .trust-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            margin: 2rem 0 3rem 0;
+            flex-wrap: wrap;
+            background-color: var(--white);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+        
+        .trust-photo {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--primary-color);
+            box-shadow: 0 4px 15px rgba(0, 90, 156, 0.2);
+        }
+        
+        .calendar-cta {
+            text-align: left;
+        }
+        
+        .calendar-button {
+            display: block;
+            background-color: var(--success-color);
+            color: var(--white);
+            padding: 1rem 2.5rem;
+            border-radius: 8px;
+            border: none;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            font-family: var(--font-family);
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.2s;
+            box-shadow: 0 4px 15px rgba(25, 135, 84, 0.3);
+            margin-top: 1rem;
+            text-align: center;
+            width: 100%;
+        }
+        
+        .calendar-button:hover {
+            background-color: #146c43;
+            transform: translateY(-2px);
+        }
+        
+        .calendar-text {
+            font-size: 1.1rem;
+            color: var(--text-color);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .calendar-subtext {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-bottom: 0.5rem;
+        }
+        
+        /* CTA Buttons Layout */
+        .cta-buttons-section {
+            margin: 2rem 0;
+        }
+        
+        /* --- Language Toggle --- */
+        .language-toggle {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            display: flex;
+            background-color: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .language-toggle button {
+            background: none;
+            border: none;
+            padding: 0.5rem 0.75rem;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .language-toggle button:hover {
+            background-color: var(--primary-light);
+        }
+        
+        .language-toggle button.active {
+            background-color: var(--primary-color);
+            color: var(--white);
+        }
+        
+        .language-toggle button.active:hover {
+            background-color: #004a80;
+        }
+        
+        /* Mobile Language Toggle */
+        @media (max-width: 768px) {
+            .language-toggle {
+                position: static;
+                margin: 0 auto 1rem auto;
+                width: fit-content;
+            }
+        }
+        
+        /* --- Phase 2 (Monatliche Belastung) --- */
+        .phase-2 {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--border-color);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+        
+        .phase-2.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .phase-2 h3 {
+            color: var(--primary-color);
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+        }
+        
+        /* Sanierungskosten Checkboxen */
+        .sanierung-checkboxes {
+            display: grid;
+            gap: 1rem;
+        }
+        
+        .sanierung-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+        
+        .sanierung-item:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .sanierung-item input[type="checkbox"] {
+            margin-top: 0.125rem;
+        }
+        
+        .sanierung-details {
+            flex: 1;
+        }
+        
+        .sanierung-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .sanierung-cost {
+            color: var(--warning-color);
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+        
+        /* Tooltips */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+        }
+        
+        .tooltip .info-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            font-size: 0.7rem;
+            font-weight: bold;
+            margin-left: 0.25rem;
+        }
+        
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 200px;
+            background-color: #333;
+            color: #fff;
+            text-align: left;
+            border-radius: 6px;
+            padding: 0.5rem;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.8rem;
+            line-height: 1.3;
+        }
+        
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        /* Warnhinweis */
+        .warning-box {
+            background-color: var(--warning-light);
+            border: 1px solid var(--warning-color);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+            display: none;
+        }
+        
+        .warning-box.visible {
+            display: block;
+        }
+        
+        .warning-box .warning-title {
+            font-weight: 700;
+            color: var(--warning-color);
+            margin-bottom: 0.5rem;
+        }
+
+        /* --- Responsive Design --- */
+        @media (min-width: 992px) {
+            .rechner-wrapper {
+                flex-wrap: nowrap;
+            }
+            .input-section {
+                width: 45%;
+                border-right: 1px solid var(--border-color);
+            }
+            .output-section {
+                width: 55%;
+                border-left: none;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <div class="language-toggle">
+                <button id="lang-de" class="active" onclick="switchLanguage('de')">
+                    🇩🇪 DE
+                </button>
+                <button id="lang-en" onclick="switchLanguage('en')">
+                    🇬🇧 EN
+                </button>
+            </div>
+            <h1 data-de="Immobilien Immobilien-Kosten-Rechner" data-en="Real Estate Cost Calculator">Immobilien Immobilien-Kosten-Rechner</h1>
+            <p data-de="Die brutale Wahrheit über die echten Kosten deines Immobilienkaufs." data-en="The brutal truth about the real costs of your property purchase.">Die brutale Wahrheit über die echten Kosten deines Immobilienkaufs.</p>
+        </header>
+
+        <main class="rechner-wrapper">
+            <!-- Eingabe-Sektion -->
+            <section class="input-section">
+                <form id="cost-calculator-form">
+                    
+                    <div class="form-group">
+                        <div class="label-wrapper">
+                            <label for="kaufpreis" data-de="Kaufpreis der Immobilie (€)" data-en="Property Purchase Price (€)">Kaufpreis der Immobilie (€)</label>
+                            <span id="kaufpreis-value" class="live-value">450.000 €</span>
+                        </div>
+                        <input type="range" id="kaufpreis" min="100000" max="2000000" step="5000" value="450000">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="wohnflaeche" data-de="Wohnfläche (m²)" data-en="Living Space (m²)">Wohnfläche (m²)</label>
+                        <input type="number" id="wohnflaeche" value="120" placeholder="z.B. 120" data-placeholder-de="z.B. 120" data-placeholder-en="e.g. 120">
+                        <p class="info-text" data-de="Wichtig für die Schätzung der Sanierungskosten." data-en="Important for estimating renovation costs.">Wichtig für die Schätzung der Sanierungskosten.</p>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="label-wrapper">
+                            <label for="eigenkapital" data-de="Dein Eigenkapital (€)" data-en="Your Equity (€)">Dein Eigenkapital (€)</label>
+                            <span id="eigenkapital-value" class="live-value">80.000 €</span>
+                        </div>
+                        <input type="range" id="eigenkapital" min="0" max="500000" step="1000" value="80000">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bundesland" data-de="Bundesland" data-en="German State">Bundesland</label>
+                        <select id="bundesland">
+                            <!-- Options will be populated by JS -->
+                        </select>
+                        <p class="info-text" data-de="Die Grunderwerbsteuer ist je nach Bundesland unterschiedlich hoch." data-en="Property transfer tax varies by German state.">Die Grunderwerbsteuer ist je nach Bundesland unterschiedlich hoch.</p>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="mitMakler" checked>
+                            <label for="mitMakler" data-de="Ja, mit Makler" data-en="Yes, with real estate agent">Ja, mit Makler</label>
+                        </div>
+                        <div id="makler-provision-rate-wrapper" class="makler-provision-rate visible">
+                            <label for="maklerprovision" data-de="Provisionssatz inkl. MwSt. (%)" data-en="Commission rate incl. VAT (%)">Provisionssatz inkl. MwSt. (%)</label>
+                            <input type="number" id="maklerprovision" value="3.57" step="0.01">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label data-de="Welche Sanierungen sind nötig?" data-en="Which renovations are needed?">Welche Sanierungen sind nötig?</label>
+                        <p class="info-text" data-de="Sei ehrlich zu dir selbst. Das erspart dir böse Überraschungen." data-en="Be honest with yourself. This will save you from nasty surprises.">Sei ehrlich zu dir selbst. Das erspart dir böse Überraschungen.</p>
+                        <div class="sanierung-checkboxes" id="sanierung-checkboxes">
+                            <!-- Will be populated by JS -->
+                        </div>
+                    </div>
+                    
+                    <!-- Phase 2: Monatliche Belastung -->
+                    <div class="phase-2" id="phase-2">
+                        <h3 data-de="Schritt 2: Ihre monatliche Belastung" data-en="Step 2: Your Monthly Burden">Schritt 2: Ihre monatliche Belastung</h3>
+                        
+                        <div class="form-group">
+                            <div class="label-wrapper">
+                                <label for="zinssatz" data-de="Zinssatz (%)" data-en="Interest Rate (%)">Zinssatz (%)
+                                    <span class="tooltip">
+                                        <span class="info-icon">i</span>
+                                        <span class="tooltip-text" data-de="Aktueller Marktzins. Ihre Bank wird Sie hier genau prüfen." data-en="Current market rate. Your bank will examine you closely here.">Aktueller Marktzins. Ihre Bank wird Sie hier genau prüfen.</span>
+                                    </span>
+                                </label>
+                                <span id="zinssatz-value" class="live-value">3.8 %</span>
+                            </div>
+                            <input type="range" id="zinssatz" min="2.0" max="7.0" step="0.1" value="3.8">
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="label-wrapper">
+                                <label for="tilgung" data-de="Anfängliche Tilgung (%)" data-en="Initial Repayment (%)">Anfängliche Tilgung (%)
+                                    <span class="tooltip">
+                                        <span class="info-icon">i</span>
+                                        <span class="tooltip-text" data-de="Mindestens 2% sind heute Standard bei den meisten Banken. Je höher, desto schneller sind Sie schuldenfrei." data-en="At least 2% is standard at most banks today. The higher, the faster you'll be debt-free.">Mindestens 2% sind heute Standard bei den meisten Banken. Je höher, desto schneller sind Sie schuldenfrei.</span>
+                                    </span>
+                                </label>
+                                <span id="tilgung-value" class="live-value">2.0 %</span>
+                            </div>
+                            <input type="range" id="tilgung" min="1.0" max="5.0" step="0.1" value="2.0">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="hausgeld" data-de="Hausgeld / Nebenkosten (€/Monat)" data-en="Maintenance Fees / Utilities (€/Month)">Hausgeld / Nebenkosten (€/Monat)
+                                <span class="tooltip">
+                                    <span class="info-icon">i</span>
+                                    <span class="tooltip-text" data-de="Fragen Sie den Makler nach dem Wirtschaftsplan! Rechnen Sie mit ca. 3,50 €/m² bei Wohnungen." data-en="Ask the agent for the management plan! Calculate about €3.50/m² for apartments.">Fragen Sie den Makler nach dem Wirtschaftsplan! Rechnen Sie mit ca. 3,50 €/m² bei Wohnungen.</span>
+                                </span>
+                            </label>
+                            <input type="number" id="hausgeld" value="420" placeholder="z.B. 420" data-placeholder-de="z.B. 420" data-placeholder-en="e.g. 420">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="grundsteuer" data-de="Grundsteuer (€/Jahr)" data-en="Property Tax (€/Year)">Grundsteuer (€/Jahr)
+                                <span class="tooltip">
+                                    <span class="info-icon">i</span>
+                                    <span class="tooltip-text" data-de="Wird bald neu berechnet. Geben Sie hier den aktuellen Wert ein." data-en="Will be recalculated soon. Enter the current value here.">Wird bald neu berechnet. Geben Sie hier den aktuellen Wert ein.</span>
+                                </span>
+                            </label>
+                            <input type="number" id="grundsteuer" value="800" placeholder="z.B. 800" data-placeholder-de="z.B. 800" data-placeholder-en="e.g. 800">
+                        </div>
+                    </div>
+
+                </form>
+            </section>
+
+            <!-- Ergebnis-Sektion -->
+            <section class="output-section">
+                <div class="results-summary">
+                    <h3 data-de="Ihre monatliche Gesamtbelastung" data-en="Your Total Monthly Burden">Ihre monatliche Gesamtbelastung</h3>
+                    <div id="monthly-total-display" class="total-investment">0 € / Monat</div>
+                    <h3 style="margin-top: 1rem;" data-de="Davon Finanzierung" data-en="Of which Financing">Davon Finanzierung</h3>
+                    <div id="monthly-financing-display" class="financing-needed">0 € / Monat</div>
+                    
+                    <div class="warning-box" id="high-burden-warning">
+                        <div class="warning-title" data-de="⚠️ Achtung: Hohe Belastung" data-en="⚠️ Warning: High Burden">⚠️ Achtung: Hohe Belastung</div>
+                        <p data-de="Banken prüfen genau, ob Ihre monatliche Belastung tragbar ist. Als Faustregel gilt oft, dass diese nicht mehr als 40% des Netto-Haushaltseinkommens betragen sollte." data-en="Banks carefully check whether your monthly burden is sustainable. As a rule of thumb, this should often not exceed 40% of net household income.">Banken prüfen genau, ob Ihre monatliche Belastung tragbar ist. Als Faustregel gilt oft, dass diese nicht mehr als 40% des Netto-Haushaltseinkommens betragen sollte.</p>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="cost-chart"></canvas>
+                </div>
+
+                <div class="cost-breakdown">
+                    <ul>
+                        <li><span class="cost-label" data-de="Monatliche Rate (Zins + Tilgung)" data-en="Monthly Rate (Interest + Repayment)">Monatliche Rate (Zins + Tilgung)</span> <span id="summary-monthly-rate" class="cost-value">0 € / Monat</span></li>
+                        <li><span class="cost-label" data-de="Hausgeld / Nebenkosten" data-en="Maintenance Fees / Utilities">Hausgeld / Nebenkosten</span> <span id="summary-hausgeld" class="cost-value">0 € / Monat</span></li>
+                        <li><span class="cost-label" data-de="Grundsteuer" data-en="Property Tax">Grundsteuer</span> <span id="summary-grundsteuer-monthly" class="cost-value">0 € / Monat</span></li>
+                        <li><span class="cost-label" data-de="Instandhaltungsrücklage" data-en="Maintenance Reserve">Instandhaltungsrücklage
+                            <span class="tooltip">
+                                <span class="info-icon">i</span>
+                                <span class="tooltip-text" data-de="Ihr persönlicher Spartopf für zukünftige Reparaturen (z.B. neue Heizung). Banken sehen gerne, dass Sie dies einplanen." data-en="Your personal savings pot for future repairs (e.g. new heating). Banks like to see that you plan for this.">Ihr persönlicher Spartopf für zukünftige Reparaturen (z.B. neue Heizung). Banken sehen gerne, dass Sie dies einplanen.</span>
+                            </span>
+                        </span> <span id="summary-instandhaltung" class="cost-value">0 € / Monat</span></li>
+                        <hr class="divider">
+                        <li class="total final-total"><span class="cost-label" data-de="IHRE MONATLICHE GESAMTBELASTUNG" data-en="YOUR TOTAL MONTHLY BURDEN">IHRE MONATLICHE GESAMTBELASTUNG</span> <span id="summary-monthly-total" class="cost-value">0 € / Monat</span></li>
+                        <hr class="divider" style="border-style: dashed;">
+                        <li style="font-size: 0.9rem; color: #6c757d;"><span class="cost-label" data-de="Zur Orientierung: Gesamtkosten der Anschaffung" data-en="For reference: Total acquisition costs">Zur Orientierung: Gesamtkosten der Anschaffung</span> <span id="summary-total-acquisition" class="cost-value">0 €</span></li>
+                        <li style="font-size: 0.9rem; color: #6c757d;"><span class="cost-label" data-de="Finanzierungsbedarf" data-en="Financing requirement">Finanzierungsbedarf</span> <span id="summary-finanzierungsbedarf" class="cost-value">0 €</span></li>
+                    </ul>
+                </div>
+            </section>
+        </main>
+        
+        <footer class="cta-section">
+            <h2 data-de="Puh, das ist mehr als gedacht?" data-en="Whoa, that's more than expected?">Puh, das ist mehr als gedacht?</h2>
+            <p data-de="Genau das ist der Punkt. Die meisten Makler zeigen dir nur den Kaufpreis. Ein ehrlicher Partner zeigt dir die Wahrheit. Ich helfe Maklern dabei, genau solche digitalen Werkzeuge zu erstellen, die Vertrauen schaffen und die richtigen Käufer anziehen." data-en="That's exactly the point. Most real estate agents only show you the purchase price. An honest partner shows you the truth. I help real estate agents create digital tools like this that build trust and attract the right buyers.">Genau das ist der Punkt. Die meisten Makler zeigen dir nur den Kaufpreis. Ein ehrlicher Partner zeigt dir die Wahrheit. Ich helfe Maklern dabei, genau solche digitalen Werkzeuge zu erstellen, die Vertrauen schaffen und die richtigen Käufer anziehen.</p>
+            
+            <div class="trust-section">
+                <img src="fabian-kuypers.webp" alt="Fabian Valoa - Vertrauensfoto" class="trust-photo">
+                <div class="calendar-cta">
+                    <div class="calendar-text" data-de="Erstes kostenfreies Strategiegespräch" data-en="First free strategy consultation">Erstes kostenfreies Strategiegespräch</div>
+                    <div class="calendar-subtext" data-de="Lassen Sie uns gemeinsam Ihre Makler-Tools optimieren" data-en="Let's optimize your real estate tools together">Lassen Sie uns gemeinsam Ihre Makler-Tools optimieren</div>
+                    <a href="https://api.leadconnectorhq.com/widget/booking/kq7NmcLVgdbnxChd37gh" target="_blank" class="calendar-button" id="calendar-link-de" data-de="Termin buchen" data-en="Book Appointment">Termin buchen</a>
+                    <a href="https://api.leadconnectorhq.com/widget/booking/lqxzeVwcGdummhsI026t" target="_blank" class="calendar-button" id="calendar-link-en" style="display: none;" data-de="Termin buchen" data-en="Book Appointment">Book Appointment</a>
+                </div>
+            </div>
+            
+            <div class="cta-buttons-section">
+                <a href="https://valoa.studio" class="cta-button" data-de="Für Makler: So geht's" data-en="For Real Estate Agents: How it works">Für Makler: So geht's</a>
+            </div>
+            
+            <div class="cta-buyer-form">
+                <p data-de="Du bist Käufer und suchst einen Makler, der Klartext spricht? Fordere hier eine Liste geprüfter Partner an:" data-en="Are you a buyer looking for a real estate agent who speaks plainly? Request a list of verified partners here:">Du bist Käufer und suchst einen Makler, der Klartext spricht? Fordere hier eine Liste geprüfter Partner an:</p>
+                <form action="#" class="form-inline">
+                    <input type="email" placeholder="Deine E-Mail-Adresse" data-placeholder-de="Deine E-Mail-Adresse" data-placeholder-en="Your email address" required>
+                    <button type="submit" data-de="Liste anfordern" data-en="Request List">Liste anfordern</button>
+                </form>
+            </div>
+        </footer>
+    </div>
+    
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        // --- DATENOBJEKTE ---
+        const grunderwerbsteuerSaetze = {
+            "Baden-Württemberg": 5.0, "Bayern": 3.5, "Berlin": 6.0, "Brandenburg": 6.5,
+            "Bremen": 5.0, "Hamburg": 5.5, "Hessen": 6.0, "Mecklenburg-Vorpommern": 6.0,
+            "Niedersachsen": 5.0, "Nordrhein-Westfalen": 6.5, "Rheinland-Pfalz": 5.0,
+            "Saarland": 6.5, "Sachsen": 5.5, "Sachsen-Anhalt": 5.0, "Schleswig-Holstein": 6.5,
+            "Thüringen": 5.0
+        };
+
+        const sanierungsZustaende = {
+            "Neubau / Top-Zustand": 0,
+            "Leichte Kosmetik (Maler, Böden)": 250,
+            "Standard-Sanierung (Bad/Küche fällig)": 700,
+            "Komplettsanierung (inkl. Fenster/Elektrik)": 1200,
+            "Energetisches Sorgenkind (Heizung, Dach)": 1800
+        };
+
+        // --- DOM-ELEMENTE ---
+        const form = document.getElementById('cost-calculator-form');
+        const kaufpreisSlider = document.getElementById('kaufpreis');
+        const kaufpreisValue = document.getElementById('kaufpreis-value');
+        const wohnflaecheInput = document.getElementById('wohnflaeche');
+        const eigenkapitalSlider = document.getElementById('eigenkapital');
+        const eigenkapitalValue = document.getElementById('eigenkapital-value');
+        const bundeslandSelect = document.getElementById('bundesland');
+        const mitMaklerCheckbox = document.getElementById('mitMakler');
+        const maklerProvisionRateWrapper = document.getElementById('makler-provision-rate-wrapper');
+        const maklerProvisionInput = document.getElementById('maklerprovision');
+        const zustandSelect = document.getElementById('zustand');
+        
+        // Output-Elemente
+        const totalInvestmentDisplay = document.getElementById('total-investment-display');
+        const financingNeededDisplay = document.getElementById('financing-needed-display');
+        const summaryKaufpreis = document.getElementById('summary-kaufpreis');
+        const summaryNotar = document.getElementById('summary-notar');
+        const summaryBundeslandName = document.getElementById('summary-bundesland-name');
+        const summarySteuerSatz = document.getElementById('summary-steuer-satz');
+        const summarySteuer = document.getElementById('summary-steuer');
+        const summaryMaklerSatz = document.getElementById('summary-makler-satz');
+        const summaryMakler = document.getElementById('summary-makler');
+        const summaryNebenkostenTotal = document.getElementById('summary-nebenkosten-total');
+        const summarySanierung = document.getElementById('summary-sanierung');
+        const summaryPuffer = document.getElementById('summary-puffer');
+        const summaryGesamtkosten = document.getElementById('summary-gesamtkosten');
+        const summaryEigenkapital = document.getElementById('summary-eigenkapital');
+        const summaryFinanzierungsbedarf = document.getElementById('summary-finanzierungsbedarf');
+        
+        // Chart
+        const ctx = document.getElementById('cost-chart').getContext('2d');
+        let costChart;
+
+        // --- INITIALISIERUNG ---
+        function init() {
+            // Dropdowns befüllen
+            populateDropdown(bundeslandSelect, Object.keys(grunderwerbsteuerSaetze), 'Nordrhein-Westfalen');
+            populateDropdown(zustandSelect, Object.keys(sanierungsZustaende), 'Leichte Kosmetik (Maler, Böden)');
+
+            // Event Listeners hinzufügen
+            form.addEventListener('input', calculateAndDisplay);
+            mitMaklerCheckbox.addEventListener('change', toggleMaklerProvision);
+
+            // Chart initialisieren
+            initializeChart();
+            
+            // Erste Berechnung durchführen
+            calculateAndDisplay();
+        }
+
+        function populateDropdown(selectElement, options, defaultValue) {
+            options.forEach(option => {
+                const optionElement = document.createElement('option');
+                optionElement.value = option;
+                optionElement.textContent = option;
+                if (option === defaultValue) {
+                    optionElement.selected = true;
+                }
+                selectElement.appendChild(optionElement);
+            });
+        }
+        
+        function toggleMaklerProvision() {
+            maklerProvisionRateWrapper.classList.toggle('visible', mitMaklerCheckbox.checked);
+            calculateAndDisplay();
+        }
+
+        // --- BERECHNUNGSLOGIK ---
+        function calculateAndDisplay() {
+            // 1. Werte aus dem Formular lesen
+            const kaufpreis = parseFloat(kaufpreisSlider.value);
+            const wohnflaeche = parseFloat(wohnflaecheInput.value) || 0;
+            const eigenkapital = parseFloat(eigenkapitalSlider.value);
+            const bundesland = bundeslandSelect.value;
+            const istMitMakler = mitMaklerCheckbox.checked;
+            const maklerSatz = parseFloat(maklerProvisionInput.value) / 100 || 0;
+            const zustand = zustandSelect.value;
+
+            // 2. Berechnungen durchführen
+            const notarKosten = kaufpreis * 0.02;
+            const steuerSatz = grunderwerbsteuerSaetze[bundesland] / 100;
+            const grunderwerbsteuer = kaufpreis * steuerSatz;
+            const maklerKosten = istMitMakler ? kaufpreis * maklerSatz : 0;
+            const nebenkosten = notarKosten + grunderwerbsteuer + maklerKosten;
+
+            const sanierungsKostenSatz = sanierungsZustaende[zustand];
+            const sanierungskosten = wohnflaeche * sanierungsKostenSatz;
+
+            const zwischensumme = kaufpreis + nebenkosten + sanierungskosten;
+            const sicherheitspuffer = zwischensumme * 0.05;
+            
+            const gesamtInvestition = zwischensumme + sicherheitspuffer;
+            const finanzierungsbedarf = gesamtInvestition - eigenkapital;
+
+            // 3. Ergebnisse anzeigen
+            // Live-Werte der Slider aktualisieren
+            kaufpreisValue.textContent = formatCurrency(kaufpreis);
+            eigenkapitalValue.textContent = formatCurrency(eigenkapital);
+
+            // Haupt-Ergebnisse
+            totalInvestmentDisplay.textContent = formatCurrency(gesamtInvestition);
+            financingNeededDisplay.textContent = formatCurrency(finanzierungsbedarf);
+
+            // Detail-Aufschlüsselung
+            summaryKaufpreis.textContent = formatCurrency(kaufpreis);
+            summaryNotar.textContent = formatCurrency(notarKosten);
+            summaryBundeslandName.textContent = bundesland;
+            summarySteuerSatz.textContent = (steuerSatz * 100).toFixed(1);
+            summarySteuer.textContent = formatCurrency(grunderwerbsteuer);
+            summaryMaklerSatz.textContent = (maklerSatz * 100).toFixed(2);
+            summaryMakler.textContent = formatCurrency(maklerKosten);
+            summaryNebenkostenTotal.textContent = formatCurrency(nebenkosten);
+            summarySanierung.textContent = formatCurrency(sanierungskosten);
+            summaryPuffer.textContent = formatCurrency(sicherheitspuffer);
+            summaryGesamtkosten.textContent = formatCurrency(gesamtInvestition);
+            summaryEigenkapital.textContent = `- ${formatCurrency(eigenkapital)}`;
+            summaryFinanzierungsbedarf.textContent = formatCurrency(finanzierungsbedarf);
+            
+            // 4. Chart aktualisieren
+            updateChart([kaufpreis, nebenkosten, sanierungskosten, sicherheitspuffer]);
+        }
+        
+        // --- CHART FUNKTIONEN ---
+        function initializeChart() {
+            costChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Kaufpreis', 'Kaufnebenkosten', 'Sanierungskosten', 'Sicherheits-Puffer'],
+                    datasets: [{
+                        data: [0, 0, 0, 0],
+                        backgroundColor: [
+                            '#005A9C', // Primärfarbe
+                            '#5ba0d8', // Helleres Blau
+                            '#FD7E14', // Warnfarbe
+                            '#fecba1'  // Helleres Orange
+                        ],
+                        borderColor: '#FFFFFF',
+                        borderWidth: 4,
+                        hoverOffset: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '65%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                font: {
+                                    family: "'Inter', sans-serif"
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed !== null) {
+                                        label += formatCurrency(context.parsed);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateChart(data) {
+            costChart.data.datasets[0].data = data;
+            costChart.update();
+        }
+
+        // --- HELPER FUNKTIONEN ---
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 }).format(value);
+        }
+
+        // --- Start ---
+        init();
+    });
+    
+    // --- LANGUAGE TOGGLE FUNCTIONALITY ---
+    let currentLanguage = 'de';
+    
+    function switchLanguage(lang) {
+        currentLanguage = lang;
+        
+        // Update button states
+        document.getElementById('lang-de').classList.toggle('active', lang === 'de');
+        document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+        
+        // Update all elements with data-de and data-en attributes
+        const elements = document.querySelectorAll('[data-de][data-en]');
+        elements.forEach(element => {
+            const text = element.getAttribute(`data-${lang}`);
+            if (text) {
+                element.textContent = text;
+            }
+        });
+        
+        // Update placeholders
+        const placeholderElements = document.querySelectorAll(`[data-placeholder-${lang}]`);
+        placeholderElements.forEach(element => {
+            const placeholder = element.getAttribute(`data-placeholder-${lang}`);
+            if (placeholder) {
+                element.placeholder = placeholder;
+            }
+        });
+        
+        // Update chart labels based on language
+        updateChartLanguage(lang);
+        
+        // Update dropdown options
+        updateDropdownOptions(lang);
+    }
+    
+    function updateChartLanguage(lang) {
+        if (typeof costChart !== 'undefined' && costChart) {
+            const labels = lang === 'de' 
+                ? ['Kaufpreis', 'Kaufnebenkosten', 'Sanierungskosten', 'Sicherheits-Puffer']
+                : ['Purchase Price', 'Purchase Costs', 'Renovation Costs', 'Safety Buffer'];
+            
+            costChart.data.labels = labels;
+            costChart.update();
+        }
+    }
+    
+    function updateDropdownOptions(lang) {
+        // Update Bundesland dropdown
+        const bundeslandSelect = document.getElementById('bundesland');
+        const selectedValue = bundeslandSelect.value;
+        
+        if (lang === 'en') {
+            // Keep German state names but add English explanation in info text
+            const infoText = bundeslandSelect.parentNode.querySelector('.info-text');
+            if (infoText) {
+                infoText.textContent = infoText.getAttribute('data-en');
+            }
+        }
+        
+        // Update Zustand dropdown options
+        const zustandSelect = document.getElementById('zustand');
+        const selectedZustand = zustandSelect.value;
+        
+        const zustandOptions = lang === 'de' ? {
+            "Neubau / Top-Zustand": "New Construction / Top Condition",
+            "Leichte Kosmetik (Maler, Böden)": "Light Cosmetics (Paint, Floors)",
+            "Standard-Sanierung (Bad/Küche fällig)": "Standard Renovation (Bath/Kitchen due)",
+            "Komplettsanierung (inkl. Fenster/Elektrik)": "Complete Renovation (incl. Windows/Electrical)",
+            "Energetisches Sorgenkind (Heizung, Dach)": "Energy Problem Child (Heating, Roof)"
+        } : {
+            "New Construction / Top Condition": "Neubau / Top-Zustand",
+            "Light Cosmetics (Paint, Floors)": "Leichte Kosmetik (Maler, Böden)",
+            "Standard Renovation (Bath/Kitchen due)": "Standard-Sanierung (Bad/Küche fällig)",
+            "Complete Renovation (incl. Windows/Electrical)": "Komplettsanierung (inkl. Fenster/Elektrik)",
+            "Energy Problem Child (Heating, Roof)": "Energetisches Sorgenkind (Heizung, Dach)"
+        };
+        
+        // Clear and repopulate zustand dropdown
+        zustandSelect.innerHTML = '';
+        Object.keys(zustandOptions).forEach(key => {
+            const option = document.createElement('option');
+            option.value = lang === 'de' ? key : zustandOptions[key];
+            option.textContent = key;
+            if ((lang === 'de' && key === selectedZustand) || (lang === 'en' && zustandOptions[key] === selectedZustand)) {
+                option.selected = true;
+            }
+            zustandSelect.appendChild(option);
+        });
+    }
+    
+    // --- BOOKING MODAL FUNCTIONALITY ---
+    let bookingIframePreloaded = false;
+    let bookingObserver = null;
+    
+    // Intersection Observer für pre-loading
+    function initBookingObserver() {
+        if ('IntersectionObserver' in window) {
+            const trustSection = document.querySelector('.trust-section');
+            
+            bookingObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && entry.intersectionRatio >= 0.7) {
+                        preloadBookingIframe();
+                        bookingObserver.unobserve(trustSection);
+                    }
+                });
+            }, {
+                threshold: 0.7
+            });
+            
+            bookingObserver.observe(trustSection);
+        }
+    }
+    
+    // Pre-load iframe im Hintergrund
+    function preloadBookingIframe() {
+        if (bookingIframePreloaded) return;
+        
+        const iframe = document.getElementById('booking-iframe');
+        const bookingUrls = {
+            de: 'https://api.leadconnectorhq.com/widget/booking/kq7NmcLVgdbnxChd37gh',
+            en: 'https://api.leadconnectorhq.com/widget/booking/lqxzeVwcGdummhsI026t'
+        };
+        
+        iframe.src = bookingUrls[currentLanguage] || bookingUrls.de;
+        
+        // Script für Booking-Widget laden
+        if (!document.querySelector('script[src*="form_embed.js"]')) {
+            const script = document.createElement('script');
+            script.src = 'https://link.msgsndr.com/js/form_embed.js';
+            script.type = 'text/javascript';
+            document.head.appendChild(script);
+        }
+        
+        bookingIframePreloaded = true;
+    }
+    
+    // Modal öffnen
+    function openBookingModal() {
+        const modal = document.getElementById('booking-modal');
+        const iframe = document.getElementById('booking-iframe');
+        const loading = document.getElementById('booking-loading');
+        
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden'; // Verhindert Scrollen im Hintergrund
+        
+        // Falls noch nicht pre-loaded, jetzt laden
+        if (!bookingIframePreloaded) {
+            preloadBookingIframe();
+        }
+        
+        // Warten bis iframe geladen ist
+        iframe.onload = function() {
+            setTimeout(() => {
+                loading.style.display = 'none';
+                iframe.classList.add('loaded');
+            }, 500); // Kurze Verzögerung für smooth UX
+        };
+        
+        // Update Modal-Texte basierend auf aktueller Sprache
+        updateModalLanguage();
+    }
+    
+    // Modal schließen
+    function closeBookingModal() {
+        const modal = document.getElementById('booking-modal');
+        const iframe = document.getElementById('booking-iframe');
+        const loading = document.getElementById('booking-loading');
+        
+        modal.classList.remove('active');
+        document.body.style.overflow = ''; // Scrollen wieder aktivieren
+        
+        // Reset für nächstes Öffnen
+        loading.style.display = 'flex';
+        iframe.classList.remove('loaded');
+    }
+    
+    // Modal-Texte für aktuelle Sprache aktualisieren
+    function updateModalLanguage() {
+        const modal = document.getElementById('booking-modal');
+        const elements = modal.querySelectorAll('[data-de][data-en]');
+        
+        elements.forEach(element => {
+            const text = element.getAttribute(`data-${currentLanguage}`);
+            if (text) {
+                element.textContent = text;
+            }
+        });
+        
+        // Iframe URL auch updaten falls Sprache gewechselt wurde
+        const iframe = document.getElementById('booking-iframe');
+        const bookingUrls = {
+            de: 'https://api.leadconnectorhq.com/widget/booking/kq7NmcLVgdbnxChd37gh',
+            en: 'https://api.leadconnectorhq.com/widget/booking/lqxzeVwcGdummhsI026t'
+        };
+        
+        const newSrc = bookingUrls[currentLanguage] || bookingUrls.de;
+        if (iframe.src !== newSrc) {
+            iframe.src = newSrc;
+            iframe.classList.remove('loaded');
+            document.getElementById('booking-loading').style.display = 'flex';
+        }
+    }
+    
+    // ESC-Taste zum Schließen des Modals
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const modal = document.getElementById('booking-modal');
+            if (modal.classList.contains('active')) {
+                closeBookingModal();
+            }
+        }
+    });
+    
+    // Klick außerhalb des Modals zum Schließen
+    document.getElementById('booking-modal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeBookingModal();
+        }
+    });
+    
+    // Observer beim Laden initialisieren
+    document.addEventListener('DOMContentLoaded', function() {
+        initBookingObserver();
+    });
+    
+    </script>
+
+</body>
+</html>
