@@ -2338,8 +2338,8 @@
                 icon = '🛑';
                 text = currentLanguage === 'de' ? 'Kritisch' : 'Critical';
                 beschreibung = currentLanguage === 'de'
-                    ? 'Seien Sie ehrlich: Das ist für die meisten Haushalte nicht tragbar und wird von Banken nur in Ausnahmefällen finanziert.'
-                    : 'Be honest: This is not sustainable for most households and is only financed by banks in exceptional cases.';
+                    ? 'Diese Belastungsquote ist für die meisten Haushalte nicht tragbar und wird von Banken nur in Ausnahmefällen finanziert.'
+                    : 'This debt ratio is not sustainable for most households and is only financed by banks in exceptional cases.';
                 zusatzInfo = currentLanguage === 'de'
                     ? 'Hinweis: Hohes Eigenkapital oder zusätzliche Sicherheiten können eine kritische Quote in manchen Fällen ausgleichen. Dies wird individuell von der Bank geprüft.'
                     : 'Note: High equity or additional securities can sometimes compensate for a critical ratio. This is checked individually by the bank.';
@@ -2361,18 +2361,18 @@
             if (belastungsquote < 38) {
                 // CTA für solvente Käufer
                 ctaClass = 'cta-gruen';
-                uberschrift = currentLanguage === 'de' ? 'Glückwunsch! Sie sind kaufbereit.' : 'Congratulations! You are ready to buy.';
+                uberschrift = currentLanguage === 'de' ? 'Gute Ausgangslage' : 'Good Starting Position';
                 text = currentLanguage === 'de'
-                    ? 'Ihr Ergebnis zeigt: Sie gehören zu den wenigen Interessenten, die ihre Hausaufgaben gemacht haben. Verschwenden Sie keine Zeit mit Maklern, die das nicht zu schätzen wissen.'
-                    : 'Your result shows: You are one of the few prospects who have done their homework. Don\'t waste time with agents who don\'t appreciate that.';
+                    ? 'Ihre Finanzierung erscheint solide. Bei Interesse können Sie den nächsten Schritt angehen und sich professionell beraten lassen.'
+                    : 'Your financing appears solid. If interested, you can take the next step and seek professional advice.';
                 buttonText = currentLanguage === 'de' ? 'Kontakt anfordern' : 'Request Contact';
             } else {
                 // CTA für unsichere Käufer
                 ctaClass = 'cta-gelb-rot';
-                uberschrift = currentLanguage === 'de' ? 'Das Ergebnis ist ernüchternd? Gut.' : 'The result is sobering? Good.';
+                uberschrift = currentLanguage === 'de' ? 'Beratung empfohlen' : 'Consultation Recommended';
                 text = currentLanguage === 'de'
-                    ? 'Genau das ist der Sinn dieses Rechners: Ehrlichkeit, bevor Zeit und Geld verbrannt werden. Ein Top-Makler verkauft Ihnen keine Träume, sondern findet realistische Lösungen.'
-                    : 'That\'s exactly the point of this calculator: honesty before time and money are wasted. A top agent doesn\'t sell you dreams, but finds realistic solutions.';
+                    ? 'Bei dieser Belastungsquote ist eine professionelle Beratung sinnvoll, um realistische Finanzierungsoptionen zu prüfen und mögliche Alternativen zu besprechen.'
+                    : 'With this debt ratio, professional consultation is advisable to examine realistic financing options and discuss possible alternatives.';
                 buttonText = currentLanguage === 'de' ? 'Kostenlose Erstberatung' : 'Free Initial Consultation';
             }
             
