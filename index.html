@@ -5,6 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Immobilien Kosten-Rechner</title>
     
+    <!-- 
+    IFRAME EMBEDDING EXAMPLE:
+    To embed this calculator on immo-hrt.de or immo-hrt.com domains, use:
+    
+    <iframe
+      src="https://immorechner.valoa.studio/index.html?theme=immo-hrt&embedded=true"
+      title="Immobilien-Kostenrechner"
+      width="100%"
+      height="2150"
+      style="border:0; background:transparent; display:block;"
+      loading="lazy"
+      referrerpolicy="origin"
+      allow="scripts"
+    />
+    
+    The ?theme=immo-hrt&embedded=true parameters ensure the correct styling
+    even if automatic detection fails.
+    -->
+    
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,6 +37,8 @@
         :root {
             --bg-color: #F8F9FA;
             --primary-color: #005A9C; /* Seriöses Blau */
+            --primary-dark: #004a80; /* Dunklerer Hover-Ton */
+            --primary-rgb: 0, 90, 156; /* Für RGBA-Effekte */
             --primary-light: #e6f0f7;
             --text-color: #212529;
             --success-color: #198754; /* Dunkles Grün */
@@ -26,6 +47,379 @@
             --border-color: #DEE2E6;
             --white: #FFFFFF;
             --font-family: 'Inter', sans-serif;
+            /* Chart-Farben als Variablen (überschreibbar durch Themes) */
+            --chart-primary: #005A9C;
+            --chart-primary-light: #5ba0d8;
+            --chart-warning: #FD7E14;
+            --chart-warning-light: #fecba1;
+        }
+
+        /* --- Brand/Theme: immo-hrt (über URL ?theme=immo-hrt) --- */
+        :root[data-theme="immo-hrt"] {
+            /* Palette gemäß Style Guide */
+            --bg-color: #F8F9FA;
+            --primary-color: #C8A882; /* gold */
+            --primary-dark: #B8956B; /* dark gold */
+            --primary-rgb: 200, 168, 130;
+            --primary-light: #E6D5B8; /* light gold */
+            --primary-accent: #B8956B; /* dezent, kein kräftiges Orange */
+            --text-color: #343A40; /* charcoal */
+            --text-light: #6C757D; /* darkGray */
+            --border-color: #E9ECEF; /* mediumGray */
+            --success-color: #28A745;
+            --warning-color: #FFC107; /* sanfter Amber */
+            --warning-light: #FFF4D4;
+            --shadow-strong: 0 8px 30px rgba(0, 0, 0, 0.12);
+            --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.08);
+            /* Sanfter Danger für kritisches Urteil */
+            --danger-color: #B46A6A;
+            --danger-rgb: 180, 106, 106;
+            --danger-border: #D9A3A3;
+            --danger-light: #F7ECEC;
+            /* Chart Colors */
+            --chart-primary: #C8A882;
+            --chart-primary-light: #E6D5B8;
+            --chart-warning: #FFC107;
+            --chart-warning-light: #FFF4D4;
+        }
+
+        /* Komponentenspezifische Akzente für immo-hrt */
+        :root[data-theme="immo-hrt"] .step-nav-button.primary,
+        :root[data-theme="immo-hrt"] .language-toggle button.active,
+        :root[data-theme="immo-hrt"] .cta-button,
+        :root[data-theme="immo-hrt"] .mobile-start-button,
+        :root[data-theme="immo-hrt"] .mobile-action-button.primary {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            border: none;
+            box-shadow: var(--shadow-medium);
+            color: #FFFFFF !important;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Glanz-Effekt für Buttons */
+        :root[data-theme="immo-hrt"] .step-nav-button.primary::before,
+        :root[data-theme="immo-hrt"] .cta-button::before,
+        :root[data-theme="immo-hrt"] .mobile-start-button::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.3) 50%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            border-radius: inherit;
+            z-index: -1;
+        }
+
+        :root[data-theme="immo-hrt"] .cta-section {
+            background: linear-gradient(135deg, var(--primary-light), rgba(var(--primary-rgb), 0.18));
+            box-shadow: var(--shadow-medium);
+            border: 1px solid rgba(var(--primary-rgb), 0.25);
+        }
+
+        /* Typografie mit POP - bessere Lesbarkeit */
+        :root[data-theme="immo-hrt"] header h1 {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 800;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+            color: var(--text-color);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        :root[data-theme="immo-hrt"] header p {
+            color: var(--text-light);
+            font-weight: 500;
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+        }
+
+        /* Secondary Buttons mit mehr Charakter */
+        :root[data-theme="immo-hrt"] .step-nav-button.secondary,
+        :root[data-theme="immo-hrt"] .mobile-action-button.secondary {
+            background: linear-gradient(135deg, transparent, rgba(var(--primary-rgb), 0.05));
+            color: var(--primary-dark);
+            border: 2px solid var(--primary-color);
+            box-shadow: 0 2px 8px rgba(var(--primary-rgb), 0.2);
+            font-weight: 600;
+        }
+
+        /* Dezente Hover-Effekte für Premium-Feeling */
+        :root[data-theme="immo-hrt"] .step-nav-button.primary:hover,
+        :root[data-theme="immo-hrt"] .mobile-action-button.primary:hover,
+        :root[data-theme="immo-hrt"] .cta-button:hover,
+        :root[data-theme="immo-hrt"] .mobile-start-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 26px rgba(var(--primary-rgb), 0.22);
+        }
+
+        :root[data-theme="immo-hrt"] .step-nav-button.primary:hover::before,
+        :root[data-theme="immo-hrt"] .cta-button:hover::before,
+        :root[data-theme="immo-hrt"] .mobile-start-button:hover::before {
+            opacity: 1;
+        }
+
+        /* Karten/Container mit Charakter - weniger glatt! */
+        :root[data-theme="immo-hrt"] .container {
+            box-shadow: var(--shadow-strong);
+            border-radius: 16px;
+            border: 1px solid rgba(var(--primary-rgb), 0.15);
+            background: linear-gradient(135deg, #FFFFFF 0%, rgba(var(--primary-rgb), 0.02) 100%);
+            position: relative;
+        }
+
+        /* Subtiler Noise-Effekt für mehr Textur */
+        :root[data-theme="immo-hrt"] .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(var(--primary-rgb), 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(var(--primary-rgb), 0.03) 0%, transparent 50%);
+            border-radius: inherit;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        :root[data-theme="immo-hrt"] .mobile-result-summary,
+        :root[data-theme="immo-hrt"] .mobile-breakdown {
+            box-shadow: 0 8px 26px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            border: 1px solid rgba(var(--primary-rgb), 0.18);
+            background: linear-gradient(135deg, var(--primary-light) 0%, #FFFFFF 100%);
+        }
+
+        :root[data-theme="immo-hrt"] .trust-section {
+            box-shadow: var(--shadow-medium);
+            border-radius: 16px;
+            border: 2px solid rgba(var(--primary-rgb), 0.25);
+            background: linear-gradient(135deg, var(--primary-light) 0%, rgba(var(--primary-rgb), 0.08) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Accent-Linie für Trust Section */
+        :root[data-theme="immo-hrt"] .trust-section::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--primary-dark));
+            border-radius: 16px 16px 0 0;
+        }
+
+        /* Bessere Lesbarkeit für alle Texte */
+        :root[data-theme="immo-hrt"] h2,
+        :root[data-theme="immo-hrt"] h3 {
+            color: var(--text-color);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            font-weight: 700;
+        }
+
+        :root[data-theme="immo-hrt"] p,
+        :root[data-theme="immo-hrt"] span,
+        :root[data-theme="immo-hrt"] label {
+            color: var(--text-color);
+            text-shadow: 0 1px 1px rgba(255, 255, 255, 0.5);
+        }
+
+        /* Inputs und Selects mit mehr Charakter */
+        :root[data-theme="immo-hrt"] input,
+        :root[data-theme="immo-hrt"] select {
+            border: 2px solid rgba(var(--primary-rgb), 0.25);
+            background: linear-gradient(135deg, #FFFFFF 0%, rgba(var(--primary-rgb), 0.02) 100%);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.04);
+            color: var(--text-color);
+            font-weight: 500;
+        }
+
+        :root[data-theme="immo-hrt"] input:focus,
+        :root[data-theme="immo-hrt"] select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.2);
+            outline: none;
+        }
+
+        /* Ergebnis-Zahlen mit mehr POP */
+        :root[data-theme="immo-hrt"] .result-amount,
+        :root[data-theme="immo-hrt"] .cost-amount {
+            color: var(--primary-dark);
+            font-weight: 800;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+        }
+
+        /* Softere Rot-Anmutung für kritisches Urteil (nur immo-hrt) */
+        :root[data-theme="immo-hrt"] .klartext-urteil {
+            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.08);
+            border-radius: 12px;
+        }
+        :root[data-theme="immo-hrt"] .urteil-rot {
+            background-color: var(--danger-light);
+            border: 2px solid var(--danger-border);
+        }
+        :root[data-theme="immo-hrt"] .urteil-rot .belastungsquote,
+        :root[data-theme="immo-hrt"] .urteil-rot .urteil-text {
+            color: var(--danger-color);
+        }
+
+        /* CTA im gelb/rot-Bereich dezenter und markenkonform */
+        :root[data-theme="immo-hrt"] .cta-gelb-rot {
+            background: linear-gradient(135deg, var(--primary-light), rgba(var(--primary-rgb), 0.14));
+            border: 1px solid rgba(var(--primary-rgb), 0.25);
+        }
+        :root[data-theme="immo-hrt"] .cta-gelb-rot h2 { color: var(--text-color); }
+        :root[data-theme="immo-hrt"] .cta-gelb-rot button {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: #FFFFFF;
+            box-shadow: 0 8px 24px rgba(var(--primary-rgb), 0.22);
+        }
+        :root[data-theme="immo-hrt"] .cta-gelb-rot button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(var(--primary-rgb), 0.28);
+        }
+
+        /* Sanierungskarten mit dezenter Schattierung */
+        :root[data-theme="immo-hrt"] .sanierung-item:hover {
+            background-color: #FBF7F0;
+            box-shadow: 0 6px 18px rgba(var(--primary-rgb), 0.12);
+        }
+        :root[data-theme="immo-hrt"] .sanierung-item.selected {
+            background-color: var(--primary-light);
+            box-shadow: 0 10px 26px rgba(var(--primary-rgb), 0.16);
+        }
+
+        /* Sanierungskosten-Preisbadge: bessere Lesbarkeit und Markenbezug */
+        :root[data-theme="immo-hrt"] .sanierung-cost {
+            color: var(--text-color);
+            background-color: rgba(var(--primary-rgb), 0.14);
+            border: 1px solid rgba(var(--primary-rgb), 0.28);
+            padding: 0.2rem 0.55rem;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 1rem;
+            line-height: 1.3;
+            font-variant-numeric: tabular-nums;
+            -moz-font-feature-settings: "tnum" 1;
+            -webkit-font-feature-settings: "tnum" 1;
+            font-feature-settings: "tnum" 1;
+            box-shadow: 0 2px 8px rgba(var(--primary-rgb), 0.12);
+        }
+        :root[data-theme="immo-hrt"] .sanierung-item.selected .sanierung-cost {
+            background-color: rgba(var(--primary-rgb), 0.18);
+            border-color: rgba(var(--primary-rgb), 0.35);
+            box-shadow: 0 3px 10px rgba(var(--primary-rgb), 0.16);
+        }
+
+        /* Subtiles Header-Shadow für klare Trennung */
+        :root[data-theme="immo-hrt"] header {
+            box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+        }
+
+        /* --- Iframe-Specific Styles --- */
+        :root[data-embedded="true"] body {
+            padding: 1rem;
+            background: transparent;
+        }
+
+        :root[data-embedded="true"] .container {
+            max-width: 100%;
+            box-shadow: none;
+            border-radius: 8px;
+            margin: 0;
+        }
+
+        :root[data-embedded="true"] header {
+            padding: 1rem 0;
+            text-align: center;
+        }
+
+        :root[data-embedded="true"] header h1 {
+            font-size: clamp(1.5rem, 3vw, 2.2rem);
+            margin-bottom: 0.5rem;
+        }
+
+        :root[data-embedded="true"] .language-toggle {
+            position: static;
+            margin-bottom: 1rem;
+            justify-content: center;
+        }
+
+        /* immo-hrt: Sprachumschalter oben rechts halten, auch im Iframe */
+        :root[data-theme="immo-hrt"] header {
+            padding-top: 3rem; /* mehr Luft über Titel/Untertitel/Toggle */
+            padding-bottom: 2.25rem;
+        }
+        :root[data-theme="immo-hrt"][data-embedded="true"] header {
+            padding-top: 2rem;  /* im Iframe etwas kompakter, aber mehr als Standard */
+            padding-bottom: 1.75rem;
+        }
+        :root[data-theme="immo-hrt"][data-embedded="true"] .language-toggle {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            margin-bottom: 0;
+            justify-content: flex-start;
+            width: auto;
+        }
+
+        :root[data-embedded="true"] .trust-section {
+            margin: 2rem 0 1rem 0;
+            padding: 1.5rem;
+        }
+
+        /* Combined iframe + immo-hrt theme styles */
+        :root[data-theme="immo-hrt"][data-embedded="true"] .container {
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+            border: 1px solid rgba(200, 168, 130, 0.2);
+        }
+
+        :root[data-theme="immo-hrt"][data-embedded="true"] header h1 {
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        :root[data-theme="immo-hrt"][data-embedded="true"] .cta-section {
+            background: linear-gradient(135deg, var(--primary-light), rgba(var(--primary-rgb), 0.1));
+            border-radius: 8px;
+        }
+
+        /* Iframe responsive adjustments */
+        @media (max-width: 768px) {
+            :root[data-embedded="true"] body {
+                padding: 0.5rem;
+            }
+            
+            :root[data-embedded="true"] .container {
+                border-radius: 4px;
+            }
+
+            :root[data-embedded="true"] header h1 {
+                font-size: clamp(1.2rem, 4vw, 1.8rem);
+            }
+        }
+
+        /* Ensure iframe content fits properly */
+        :root[data-embedded="true"] .mobile-step-navigation {
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+        }
+
+        :root[data-embedded="true"] .step-modal {
+            max-height: none;
+            height: auto;
         }
 
         /* --- Reset & Body --- */
@@ -130,7 +524,7 @@
         input[type="number"]:focus, select:focus {
             outline: none;
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(0, 90, 156, 0.2);
+            box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.2);
         }
 
         /* Slider Stile */
@@ -240,13 +634,13 @@
             background-color: #f8f9fa;
             border-color: var(--primary-color);
             transform: translateY(-1px);
-            box-shadow: 0 2px 8px rgba(0, 90, 156, 0.1);
+            box-shadow: 0 2px 8px rgba(var(--primary-rgb), 0.1);
         }
         
         .sanierung-item.selected {
             background-color: var(--primary-light);
             border-color: var(--primary-color);
-            box-shadow: 0 2px 8px rgba(0, 90, 156, 0.15);
+            box-shadow: 0 2px 8px rgba(var(--primary-rgb), 0.15);
         }
         
         .sanierung-item input[type="checkbox"] {
@@ -345,11 +739,11 @@
             font-size: 1.3rem;
             margin-bottom: 1rem;
             font-weight: 700;
-            background: linear-gradient(135deg, var(--primary-light) 0%, rgba(0, 90, 156, 0.15) 100%);
+            background: linear-gradient(135deg, var(--primary-light) 0%, rgba(var(--primary-rgb), 0.15) 100%);
             padding: 1rem;
             border-radius: 8px;
             border-left: 4px solid var(--primary-color);
-            box-shadow: 0 2px 8px rgba(0, 90, 156, 0.1);
+            box-shadow: 0 2px 8px rgba(var(--primary-rgb), 0.1);
         }
         
         .klartext-urteil {
@@ -665,11 +1059,11 @@
             text-decoration: none;
             font-weight: 600;
             transition: background-color 0.2s, transform 0.2s;
-            box-shadow: 0 4px 15px rgba(0, 90, 156, 0.2);
+            box-shadow: 0 4px 15px rgba(var(--primary-rgb), 0.2);
         }
         
         .cta-button:hover {
-            background-color: #004a80;
+            background-color: var(--primary-dark);
             transform: translateY(-2px);
         }
         
@@ -732,7 +1126,7 @@
             border-radius: 50%;
             object-fit: cover;
             border: 3px solid var(--primary-color);
-            box-shadow: 0 4px 15px rgba(0, 90, 156, 0.2);
+            box-shadow: 0 4px 15px rgba(var(--primary-rgb), 0.2);
         }
         
         .calendar-cta {
@@ -817,7 +1211,7 @@
         }
         
         .language-toggle button.active:hover {
-            background-color: #004a80;
+            background-color: var(--primary-dark);
         }
         
         /* Mobile Step Navigation */
@@ -921,7 +1315,7 @@
             }
             
             .step-nav-button.primary:hover {
-                background-color: #004a80;
+                background-color: var(--primary-dark);
             }
             
             .step-nav-button.secondary {
@@ -951,15 +1345,15 @@
                 font-weight: 700;
                 font-size: 1.1rem;
                 cursor: pointer;
-                box-shadow: 0 4px 20px rgba(0, 90, 156, 0.3);
+                box-shadow: 0 4px 20px rgba(var(--primary-rgb), 0.3);
                 transition: all 0.2s;
                 z-index: 100;
             }
             
             .mobile-start-button:hover {
-                background-color: #004a80;
+                background-color: var(--primary-dark);
                 transform: translateY(-2px);
-                box-shadow: 0 6px 25px rgba(0, 90, 156, 0.4);
+                box-shadow: 0 6px 25px rgba(var(--primary-rgb), 0.4);
             }
             
             .rechner-wrapper {
@@ -1107,7 +1501,7 @@
             }
             
             .mobile-action-button.primary:hover {
-                background-color: #004a80;
+                background-color: var(--primary-dark);
             }
             
             /* Mobile Tooltip Override */
@@ -1255,6 +1649,50 @@
         }
 
     </style>
+    <script>
+      // Early theme switch: enable immo-hrt only when hosted on or embedded by immo-hrt.de/.com
+      (function() {
+        try {
+          var allowed = ['immo-hrt.de', 'immo-hrt.com'];
+          var host = (window.location.hostname || '').toLowerCase();
+          var ref = (document.referrer || '').toLowerCase();
+          var params = new URLSearchParams(window.location.search);
+          
+          // Check URL parameters first (most reliable)
+          var forceTheme = params.get('theme') === 'immo-hrt';
+          var forceEmbedded = params.get('embedded') === 'true';
+          
+          // Check domain/referrer
+          var matchesHost = allowed.some(function(d){ return host === d || host.endsWith('.' + d); });
+          var matchesRef = allowed.some(function(d){ return ref.indexOf(d) !== -1; });
+          
+          // Check if embedded in iframe from allowed domains
+          var isInIframe = window.self !== window.top;
+          var parentMatches = false;
+          if (isInIframe) {
+            try {
+              // Try to access parent domain (will throw error if cross-origin)
+              var parentHost = window.parent.location.hostname.toLowerCase();
+              parentMatches = allowed.some(function(d){ return parentHost === d || parentHost.endsWith('.' + d); });
+            } catch (e) {
+              // Cross-origin iframe - check referrer instead
+              parentMatches = matchesRef;
+            }
+          }
+          
+          // Apply theme if forced via URL or domain matches
+          if (forceTheme || matchesHost || matchesRef || parentMatches) {
+            document.documentElement.setAttribute('data-theme', 'immo-hrt');
+          }
+          
+          // Apply embedded styling if forced via URL or actually in iframe
+          if (forceEmbedded || isInIframe) {
+            document.documentElement.setAttribute('data-embedded', 'true');
+          }
+          
+        } catch (_) {}
+      })();
+    </script>
 </head>
 <body>
 
@@ -1500,6 +1938,13 @@
                 <div class="reference-costs">
                     <h4 data-de="Zur Orientierung: Kosten der Anschaffung" data-en="For Reference: Acquisition Costs">Zur Orientierung: Kosten der Anschaffung</h4>
                     <ul>
+                        <li><span class="cost-label" data-de="Kaufpreis + Nebenkosten + Sanierung" data-en="Purchase price + Additional costs + Renovation">Kaufpreis + Nebenkosten + Sanierung</span> <span id="summary-base-costs" class="cost-value">0 €</span></li>
+                        <li><span class="cost-label" data-de="Sicherheitsreserve (5%)" data-en="Safety reserve (5%)">Sicherheitsreserve (5%)
+                            <span class="tooltip">
+                                <span class="info-icon">i</span>
+                                <span class="tooltip-text" data-de="Empfohlene Pufferreserve für unvorhergesehene Kosten bei der Anschaffung." data-en="Recommended buffer reserve for unforeseen costs during acquisition.">Empfohlene Pufferreserve für unvorhergesehene Kosten bei der Anschaffung.</span>
+                            </span>
+                        </span> <span id="summary-safety-buffer" class="cost-value">0 €</span></li>
                         <li><span class="cost-label" data-de="Gesamtkosten der Anschaffung" data-en="Total acquisition costs">Gesamtkosten der Anschaffung</span> <span id="summary-total-acquisition" class="cost-value">0 €</span></li>
                         <li><span class="cost-label" data-de="Daraus Finanzierungsbedarf" data-en="Resulting financing requirement">Daraus Finanzierungsbedarf</span> <span id="summary-finanzierungsbedarf" class="cost-value">0 €</span></li>
                     </ul>
@@ -1586,6 +2031,8 @@
         const summaryGrundsteuerMonthly = document.getElementById('summary-grundsteuer-monthly');
         const summaryInstandhaltung = document.getElementById('summary-instandhaltung');
         const summaryMonthlyTotal = document.getElementById('summary-monthly-total');
+        const summaryBaseCosts = document.getElementById('summary-base-costs');
+        const summarySafetyBuffer = document.getElementById('summary-safety-buffer');
         const summaryTotalAcquisition = document.getElementById('summary-total-acquisition');
         const summaryFinanzierungsbedarf = document.getElementById('summary-finanzierungsbedarf');
         
@@ -1765,6 +2212,8 @@
             summaryGrundsteuerMonthly.textContent = formatCurrency(grundsteuerMonatlich) + ' / Monat';
             summaryInstandhaltung.textContent = formatCurrency(instandhaltung) + ' / Monat';
             summaryMonthlyTotal.textContent = formatCurrency(monatlicheGesamtbelastung) + ' / Monat';
+            summaryBaseCosts.textContent = formatCurrency(zwischensumme);
+            summarySafetyBuffer.textContent = formatCurrency(sicherheitspuffer);
             summaryTotalAcquisition.textContent = formatCurrency(gesamtInvestition);
             summaryFinanzierungsbedarf.textContent = formatCurrency(finanzierungsbedarf);
             
@@ -1960,6 +2409,10 @@
         }
         
         // --- CHART FUNKTIONEN ---
+        function getCssVar(name) {
+            return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+        }
+
         function initializeChart() {
             costChart = new Chart(ctx, {
                 type: 'doughnut',
@@ -1968,10 +2421,10 @@
                     datasets: [{
                         data: [0, 0, 0, 0],
                         backgroundColor: [
-                            '#005A9C', // Primärfarbe
-                            '#5ba0d8', // Helleres Blau
-                            '#FD7E14', // Warnfarbe
-                            '#fecba1'  // Helleres Orange
+                            getCssVar('--chart-primary'),
+                            getCssVar('--chart-primary-light'),
+                            getCssVar('--chart-warning'),
+                            getCssVar('--chart-warning-light')
                         ],
                         borderColor: '#FFFFFF',
                         borderWidth: 4,
@@ -1988,7 +2441,7 @@
                             labels: {
                                 padding: 20,
                                 font: {
-                                    family: "'Inter', sans-serif"
+                                    family: getCssVar('--font-family') || "'Inter', sans-serif"
                                 }
                             }
                         },
