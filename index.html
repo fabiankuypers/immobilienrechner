@@ -682,6 +682,13 @@
             font-weight: bold;
             margin-left: 0.25rem;
         }
+
+        .tooltip .tooltip-label {
+            margin-left: 0.35rem;
+            text-decoration: underline;
+            text-decoration-style: dotted;
+            cursor: help;
+        }
         
         .tooltip .tooltip-text {
             visibility: hidden;
@@ -692,7 +699,7 @@
             border-radius: 6px;
             padding: 0.5rem;
             position: absolute;
-            z-index: 1;
+            z-index: 50;
             bottom: 125%;
             left: 50%;
             margin-left: -100px;
@@ -700,11 +707,31 @@
             transition: opacity 0.3s;
             font-size: 0.8rem;
             line-height: 1.3;
+            white-space: pre-line;
         }
-        
+
         .tooltip:hover .tooltip-text {
             visibility: visible;
             opacity: 1;
+        }
+
+        /* Show tooltip on focus for keyboard/mobile accessibility */
+        .tooltip:focus .tooltip-text,
+        .tooltip:focus-within .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Wider tooltip for calculation explainer */
+        .tooltip.tooltip-wide .tooltip-text {
+            width: 320px;
+            margin-left: -160px;
+        }
+
+        /* Position tooltip below trigger when needed */
+        .tooltip.tooltip-bottom .tooltip-text {
+            bottom: auto;
+            top: 125%;
         }
         
         /* Warnhinweis */
@@ -1937,6 +1964,24 @@
                 <!-- Zur Orientierung: Anschaffungskosten -->
                 <div class="reference-costs">
                     <h4 data-de="Zur Orientierung: Kosten der Anschaffung" data-en="For Reference: Acquisition Costs">Zur Orientierung: Kosten der Anschaffung</h4>
+                    <div class="so-rechnen-wrapper" style="margin: -0.25rem 0 0.75rem 0;">
+                        <span class="tooltip tooltip-wide tooltip-bottom" aria-label="So rechnen wir" tabindex="0">
+                            <span class="info-icon">i</span>
+                            <span class="tooltip-label" data-de="So rechnen wir" data-en="How we calculate">So rechnen wir</span>
+                            <span class="tooltip-text"
+                                  data-de="So rechnen wir:\n- Monatsrate (Start): Darlehen × (Sollzins + anfängliche Tilgung) / 12. Ohne Laufzeit – es ist die anfängliche Annuität.\n- Darlehen: Kaufpreis + Nebenkosten + ausgewählte Sanierungen + 5% Sicherheitsreserve − Eigenkapital.\n- Nebenkosten: Notar/Grundbuch 2% + Grunderwerbsteuer (Bundesland) + Makler (Standard 3,57% auf Kaufpreis, optional abschaltbar).\n- Monatliche Gesamtbelastung: Monatsrate + Hausgeld + Grundsteuer/12 + Instandhaltung (1 €/m²/Monat).\n- Instandhaltung ist zusätzlich zum Hausgeld.\n- Anzeige rundet auf ganze €; intern rechnen wir exakt."
+                                  data-en="How we calculate:\n- Monthly rate (start): Loan × (interest rate + initial repayment) / 12. No term – this is the initial annuity.\n- Loan amount: Purchase price + closing costs + selected renovations + 5% safety buffer − your equity.\n- Closing costs: Notary/land registry 2% + property transfer tax (by state) + agent (default 3.57% on purchase price, optional toggle).\n- Total monthly burden: Monthly rate + homeowners fees + property tax/12 + maintenance reserve (1 €/m²/month).\n- Maintenance is in addition to homeowners fees.\n- Display rounds to whole euros; calculation is exact.">
+                                So rechnen wir:
+                                
+                                - Monatsrate (Start): Darlehen × (Sollzins + anfängliche Tilgung) / 12. Ohne Laufzeit – es ist die anfängliche Annuität.
+                                - Darlehen: Kaufpreis + Nebenkosten + ausgewählte Sanierungen + 5% Sicherheitsreserve − Eigenkapital.
+                                - Nebenkosten: Notar/Grundbuch 2% + Grunderwerbsteuer (Bundesland) + Makler (Standard 3,57% auf Kaufpreis, optional abschaltbar).
+                                - Monatliche Gesamtbelastung: Monatsrate + Hausgeld + Grundsteuer/12 + Instandhaltung (1 €/m²/Monat).
+                                - Instandhaltung ist zusätzlich zum Hausgeld.
+                                - Anzeige rundet auf ganze €; intern rechnen wir exakt.
+                            </span>
+                        </span>
+                    </div>
                     <ul>
                         <li><span class="cost-label" data-de="Kaufpreis + Nebenkosten + Sanierung" data-en="Purchase price + Additional costs + Renovation">Kaufpreis + Nebenkosten + Sanierung</span> <span id="summary-base-costs" class="cost-value">0 €</span></li>
                         <li><span class="cost-label" data-de="Sicherheitsreserve (5%)" data-en="Safety reserve (5%)">Sicherheitsreserve (5%)
@@ -2502,8 +2547,9 @@
         // Update all elements with data-de and data-en attributes
         const elements = document.querySelectorAll('[data-de][data-en]');
         elements.forEach(element => {
-            const text = element.getAttribute(`data-${lang}`);
-            if (text) {
+            const raw = element.getAttribute(`data-${lang}`);
+            if (raw !== null) {
+                const text = raw.replace(/\\n/g, "\n");
                 element.textContent = text;
             }
         });
